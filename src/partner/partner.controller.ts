@@ -4,21 +4,26 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Partner } from '@prisma/client';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { PrismaService } from 'src/prisma/prisma.service';
+
+class AuthDto {
+  @IsString()
+  @IsNotEmpty()
+  public code: string;
+}
 
 @Controller('partner')
 export class PartnerController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Post('auth')
-  async authentificate(@Body('code') code: string): Promise<Partner> {
-    if (!code)
-      throw new HttpException(
-        'no code provided in body',
-        HttpStatus.BAD_REQUEST,
-      );
+  @UsePipes(ValidationPipe)
+  async authentificate(@Body() { code }: AuthDto): Promise<Partner> {
     const res = await this.prisma.partner.findOne({
       where: { code },
     });
