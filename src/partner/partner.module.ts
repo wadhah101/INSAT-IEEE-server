@@ -4,8 +4,8 @@ import { PartnerService } from './partner.service';
 import { PartnerController } from './partner.controller';
 
 @Module({
-  imports: [PrismaService],
-  providers: [PartnerService],
+  imports: [],
+  providers: [PartnerService, PrismaService],
   controllers: [PartnerController],
 })
 export class PartnerModule {}

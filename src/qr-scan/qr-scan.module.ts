@@ -4,8 +4,8 @@ import { QrScanService } from './qr-scan.service';
 import { QrScanController } from './qr-scan.controller';
 
 @Module({
-  imports: [PrismaService],
-  providers: [QrScanService],
+  imports: [],
+  providers: [QrScanService, PrismaService],
   controllers: [QrScanController],
 })
 export class QrScanModule {}
