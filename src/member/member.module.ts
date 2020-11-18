@@ -7,5 +7,6 @@ import { Module } from '@nestjs/common';
   imports: [],
   controllers: [MemberController],
   providers: [MemberService, PrismaService],
+  exports: [MemberService],
 })
 export class MemberModule {}
