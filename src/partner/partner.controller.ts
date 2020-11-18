@@ -18,11 +18,11 @@ class AuthDto {
 }
 
 @Controller('partner')
+@UsePipes(ValidationPipe)
 export class PartnerController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Post('auth')
-  @UsePipes(ValidationPipe)
   async authentificate(@Body() { code }: AuthDto): Promise<Partner> {
     const res = await this.prisma.partner.findOne({
       where: { code },
