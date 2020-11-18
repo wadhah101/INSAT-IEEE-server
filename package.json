@@ -26,6 +26,8 @@
     "@nestjs/core": "^7.0.0",
     "@nestjs/platform-express": "^7.0.0",
     "@prisma/client": "^2.11.0",
+    "@types/faker": "^5.1.4",
+    "faker": "^5.1.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4"

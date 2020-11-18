@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -26,8 +26,9 @@ model Member {
 }
 
 model IEEEAccount {
-  id               Int       @id 
+  id               Int       @id @default(autoincrement())
   email            String
+  code             Int
   registrationDate DateTime?
   member           Member    @relation(fields: [memberId], references: [id])
   memberId         Int
