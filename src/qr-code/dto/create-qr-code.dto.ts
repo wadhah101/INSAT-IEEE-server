@@ -6,6 +6,6 @@ export class CreateQrCodeDto {
   public code: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  public id: number;
+  @IsString()
+  public id: string;
 }
