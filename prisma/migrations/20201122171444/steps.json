@@ -1,0 +1,37 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "UpdateField",
+      "model": "Member",
+      "field": "id",
+      "type": "String"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Member",
+          "field": "id"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "newValue": "uuid()"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "IEEEAccount",
+      "field": "memberId",
+      "type": "String"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "QrScan",
+      "field": "memberId",
+      "type": "String"
+    }
+  ]
+}

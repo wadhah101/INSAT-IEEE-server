@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -15,7 +15,7 @@ model Chapter {
 }
 
 model Member {
-  id          String       @id @default(cuid())
+  id          String       @id @default(uuid())
   name        String
   lastname    String
   gender      Gender?
