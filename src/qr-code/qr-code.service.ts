@@ -14,6 +14,7 @@ export class QrCodeService {
     });
     const member = await this.prisma.member.findOne({
       where: { id: createQrCodeDto.id },
+      include: { ieeeAccount: true },
     });
 
     if (!partner)
@@ -30,7 +31,10 @@ export class QrCodeService {
         date: new Date(),
       },
     });
-    return qr;
+
+    const res = { ...(await qr), hasIEEEAcount: !!member.ieeeAccount };
+
+    return res;
   }
 
   findAll() {
