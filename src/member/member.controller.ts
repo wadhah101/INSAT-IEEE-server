@@ -1,37 +1,51 @@
-import { toFile as QrFile } from 'qrcode';
-import { PrismaService } from './../prisma/prisma.service';
-import { Controller, Get } from '@nestjs/common';
-import { Member } from '@prisma/client';
-import { join as fsJoin } from 'path';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { MemberService } from './member.service';
+import { CreateMemberDto } from './dto/create-member.dto';
+import { UpdateMemberDto } from './dto/update-member.dto';
 import { env } from 'process';
+import { Member } from '@prisma/client';
 
 @Controller('member')
 export class MemberController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly memberService: MemberService) {}
 
-  @Get()
-  async getHello(): Promise<Member[]> {
-    if (env.NODE_ENV === 'production') return [];
-    return this.prisma.member.findMany({ include: { ieeeAccount: true } });
+  @Post()
+  create(@Body() createMemberDto: CreateMemberDto) {
+    return this.memberService.create(createMemberDto);
   }
 
-  @Get('qr')
-  async genqQr(): Promise<string[]> {
+  @Get()
+  async findAll(): Promise<Member[]> {
     if (env.NODE_ENV === 'production') return [];
-    const c = await this.getHello();
-    const files = c.map((e) => ({
-      path: fsJoin(process.env.OUTPUT_QR, `${e.id}.png`),
-      data: e.id,
-    }));
+    return this.memberService.findAll();
+  }
 
-    const codes = files.map((e) =>
-      QrFile(e.path, e.data, {
-        margin: 1,
-        scale: 20,
-      }),
-    );
-    await Promise.all(codes);
+  @Get('gen-qrs')
+  async genqQrs(): Promise<string[]> {
+    if (env.NODE_ENV === 'production') return [];
+    return this.memberService.genqQrs();
+  }
 
-    return files.map((e) => e.path);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.memberService.findOne(+id);
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto) {
+    return this.memberService.update(+id, updateMemberDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.memberService.remove(+id);
   }
 }
