@@ -3,6 +3,7 @@ import { PrismaService } from './../prisma/prisma.service';
 import { Controller, Get } from '@nestjs/common';
 import { Member } from '@prisma/client';
 import { join } from 'path';
+import { env } from 'process';
 
 @Controller('member')
 export class MemberController {
@@ -10,6 +11,7 @@ export class MemberController {
 
   @Get()
   async getHello(): Promise<Member[]> {
+    if (env.NODE_ENV === 'production') return [];
     return this.prisma.member.findMany({ include: { ieeeAccount: true } });
   }
 
