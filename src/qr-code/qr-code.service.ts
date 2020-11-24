@@ -1,3 +1,4 @@
+import { IEEEAccount, Member } from '@prisma/client';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateQrCodeDto } from './dto/create-qr-code.dto';
@@ -8,6 +9,8 @@ import { QrCode } from './entities/qr-code.entity';
 export class QrCodeService {
   constructor(public readonly prisma: PrismaService) {}
 
+  // has account / don't have account / expired : test scenarios
+  // partner disabled / enabled / wrong code
   async create(createQrCodeDto: CreateQrCodeDto): Promise<QrCode> {
     const partner = await this.prisma.partner.findOne({
       where: { code: createQrCodeDto.code },
@@ -32,7 +35,11 @@ export class QrCodeService {
       },
     });
 
-    const res = { ...(await qr), hasIEEEAcount: !!member.ieeeAccount };
+    const res = {
+      ...(await qr),
+      hasIEEEAcount: !!member.ieeeAccount,
+      expiredAccount: !!member.ieeeAccount && accountExpired(member),
+    };
 
     return res;
   }
@@ -52,4 +59,14 @@ export class QrCodeService {
   remove(id: number) {
     return `This action removes a #${id} qrCode`;
   }
+}
+
+function accountExpired(memeber: Member & { ieeeAccount: IEEEAccount }) {
+  const Difference_In_Time =
+    new Date().getTime() - memeber.ieeeAccount.registrationDate.getTime();
+
+  // To calculate the no. of days between two dates
+  const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+
+  return Difference_In_Days > 365 * 1.5;
 }
