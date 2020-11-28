@@ -20,6 +20,6 @@ export class GoogleDriveService {
         e.data.on('error', (error) => reject(error)).pipe(file);
       });
     });
-    return work;
+    return Promise.all(work);
   }
 }

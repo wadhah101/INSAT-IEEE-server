@@ -1,5 +1,4 @@
 import { GoogleDriveService } from './google-drive.service';
-import { MemberModule } from '../../member/member.module';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MemberService } from '../../member/member.service';
 import { Module } from '@nestjs/common';
@@ -7,7 +6,7 @@ import { RawCardInfoModule } from 'src/utils/raw/raw-card-info/raw-card-info.mod
 import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
 
 @Module({
-  imports: [MemberModule, RawCardInfoModule],
+  imports: [RawCardInfoModule],
   providers: [
     PrismaService,
     GoogleDriveService,

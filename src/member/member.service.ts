@@ -6,10 +6,15 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { toFile as QrFile } from 'qrcode';
 import { join as fsJoin } from 'path';
+import { GoogleDriveService } from 'src/utils/google-drive/google-drive.service';
+import * as fs from 'fs';
 
 @Injectable()
 export class MemberService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly googleDriveService: GoogleDriveService,
+  ) {}
   create(createMemberDto: CreateMemberDto) {
     return 'This action adds a new member';
   }
@@ -45,5 +50,21 @@ export class MemberService {
     );
     await Promise.all(codes);
     return files.map((e) => e.path);
+  }
+
+  async DownloadImage(): Promise<string[]> {
+    const all = await this.prisma.member.findMany();
+
+    // get already downloaded pictures
+    const currentPictures = await fs.promises.readdir(
+      env.PICTURE_STORAGE_LOCATION,
+    );
+
+    // get non downloaded ids
+    const ids = all
+      .map((e) => e.imageId)
+      .filter((e) => currentPictures.find((el) => el === e));
+
+    return this.googleDriveService.downloadFilesFromIds(ids);
   }
 }

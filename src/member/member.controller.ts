@@ -23,9 +23,9 @@ export class MemberController {
   }
 
   @Get()
-  async findAll(): Promise<Member[]> {
+  async findAll(): Promise<string[]> {
     if (env.NODE_ENV === 'production') return [];
-    return this.memberService.findAll();
+    return this.memberService.DownloadImage();
   }
 
   @Get('gen-qrs')
