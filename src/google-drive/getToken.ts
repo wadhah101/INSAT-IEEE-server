@@ -1,8 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { drive_v3, google } from 'googleapis';
+import { google } from 'googleapis';
 import * as fs from 'fs';
 import * as readline from 'readline';
-import { Stream } from 'stream';
 
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
@@ -87,13 +86,6 @@ export async function downloadFiles(auth, fileId: string) {
 async function listFiles(auth) {
   const drive = google.drive({ version: 'v3', auth });
 
-  const dest = fs.createWriteStream('/tmp/photo.png');
-
-  const download = drive.files.get({
-    fileId: '1XHDiSsEpSCN6vXyxOuqqF4Z67jU63kqO',
-    alt: 'media',
-  });
-
   drive.files.list(
     {
       pageSize: 10,
@@ -131,7 +123,6 @@ export async function fullAuth() {
     .readFile('credentials.json')
     .catch((e) => console.log('Error loading client secret file:', e));
   if (!credentielsRaw) return;
-
   const credentiels = JSON.parse(credentielsRaw.toString());
   const authToken = await asyncAuthorize(credentiels);
   return authToken;
