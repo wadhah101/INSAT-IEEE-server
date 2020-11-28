@@ -12,9 +12,7 @@ import * as Papa from 'papaparse';
 @Injectable()
 export class RawCardInfoService implements OnApplicationBootstrap {
   private cardData: RawCardInfo[];
-  private inscriptionData: any[];
-
-  // TODO inscription form remove 216 from phone number and remove spaces
+  private inscriptionData: RawInscriptionInfo[];
   async onApplicationBootstrap() {
     const cardFile = await fs.promises.readFile(env.FORM_DATA, 'utf-8');
     this.cardData = Papa.parse<RawCardInfo>(cardFile, {
@@ -27,7 +25,7 @@ export class RawCardInfoService implements OnApplicationBootstrap {
       'utf-8',
     );
 
-    this.inscriptionData = Papa.parse(inscriptionFile, {
+    this.inscriptionData = Papa.parse<RawInscriptionInfo>(inscriptionFile, {
       header: true,
       transformHeader: (_, ind) => RawInscriptionInfo.headerTransformer(ind),
       transform: (e, field) => RawInscriptionInfo.numberTransformer(e, field),

@@ -16,12 +16,14 @@ model Chapter {
 
 model Member {
   id          String       @id @default(cuid())
-  fullName    String       
+  fullName    String
   gender      Gender?
   imageUrl    String?
   fbLink      String?      @unique
   phone       Int?         @unique
   email       String?      @unique
+  studyField  String?
+  studyLevel  Int?
   ieeeAccount IEEEAccount?
   chapters    Chapter[]
   qrScans     QrScan[]
