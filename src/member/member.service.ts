@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
 import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
 import * as fileType from 'file-type';
+import * as papa from 'papaparse';
 
 @Injectable()
 export class MemberService {
@@ -24,7 +25,10 @@ export class MemberService {
   }
 
   async genqQrs(): Promise<string[]> {
-    const c = await this.findAll();
+    const c = await this.prisma.member.findMany({
+      select: { id: true },
+      where: { imageFile: { not: null } },
+    });
     const files = c.map((e) => ({
       path: fsJoin(env.OUTPUT_QR, `${e.id}.png`),
       data: e.id,
@@ -40,6 +44,7 @@ export class MemberService {
     return files.map((e) => e.path);
   }
 
+  // takes data from inscription form csv and inserts it into database
   async seedFromInscription() {
     // only leave unique inputs
     const raw = this.rawCardInfoService.inscriptionData
@@ -65,12 +70,14 @@ export class MemberService {
     return this.prisma.$transaction(req);
   }
 
+  // takes data from cardForm csv and either links it with old member or creates new member
   async seedFromCardForm() {
     const pattern = /id=(.*)/;
     const raw = this.rawCardInfoService.cardData;
 
     const res = await this.prisma.member.findMany();
 
+    // classify members into two group ,  based on inscription form user record existance
     const [inprev, nonInPrev] = raw.reduce<RawCardInfo[][]>(
       (acc, cur) => {
         const isInPrev = !!res.find(
@@ -115,25 +122,22 @@ export class MemberService {
   }
 
   async downloadImage() {
-    const all = await this.prisma.member.findMany();
-
-    // get already downloaded pictures
-    const currentPictures = await fs.promises.readdir(
-      env.PICTURE_STORAGE_LOCATION_RAW,
-    );
+    const all = await this.prisma.member.findMany({
+      select: { imageDriveId: true },
+      where: { imageDriveId: { not: null }, imageFile: { equals: null } },
+    });
 
     // get non downloaded ids
-    const ids = all
-      .map((e) => e.imageDriveId)
-      .filter((e) => e)
-      .filter((e) => !currentPictures.find((el) => el === e));
+    const ids = all.map((e) => e.imageDriveId);
+    if (!ids.length) return [];
 
     return this.googleDriveService.downloadFilesFromIds(ids);
   }
 
   async linkImages() {
-    const all = await this.prisma.member.findMany();
-    const data = all.filter((e) => e.imageDriveId && !e.imageFile);
+    const data = await this.prisma.member.findMany({
+      where: { imageDriveId: { not: null }, imageFile: { equals: null } },
+    });
 
     const withImagesReq = data.map(async (e) => {
       const oldPath = join(env.PICTURE_STORAGE_LOCATION_RAW, e.imageDriveId);
@@ -154,5 +158,22 @@ export class MemberService {
     );
 
     return this.prisma.$transaction(updates);
+  }
+
+  async exportToAnisCsv() {
+    const raw = await this.prisma.member.findMany({
+      select: { id: true, fullName: true, imageFile: true },
+      where: { imageFile: { not: null } },
+    });
+
+    const data = raw.map((e) => ({
+      fullName: e.fullName,
+      imageFile: e.imageFile,
+      qrCode: `${e.id}.png`,
+    }));
+
+    const result = papa.unparse(data, { quotes: true });
+
+    return fs.promises.writeFile(join(env.OUTPUT_CSV, 'anis.csv'), result);
   }
 }

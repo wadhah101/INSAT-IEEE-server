@@ -41,4 +41,10 @@ export class MemberController {
     if (env.NODE_ENV === 'production') return [];
     return this.memberService.linkImages();
   }
+
+  @Get('aniscsv')
+  async anisCsv() {
+    if (env.NODE_ENV === 'production') return [];
+    return this.memberService.exportToAnisCsv();
+  }
 }
