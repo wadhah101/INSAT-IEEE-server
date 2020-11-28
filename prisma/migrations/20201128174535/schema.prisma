@@ -1,11 +1,10 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["transactionApi"]
+  provider = "prisma-client-js"
 }
 
 model Chapter {
@@ -21,7 +20,7 @@ model Member {
   gender       Gender?
   imageDriveId String?      @unique
   imageFile    String?      @unique
-  fbLink       String?      @unique
+  fbLink       String?      
   phone        Int?         @unique
   email        String?      @unique
   studyField   String?

@@ -1,3 +1,4 @@
+import { Gender, Prisma } from '@prisma/client';
 const chaptersPattern = /(PES)|(RAS)|(IAS)|(EMBS)|(CS)|(WIE)/g;
 
 export class RawCardInfo {
@@ -27,13 +28,22 @@ export class RawInscriptionInfo {
   firstName: string;
   lastName: string;
   gender: 'Male' | 'Female';
-  perosnalEmail: string;
+  email: string;
   phone: number;
-  facebook: string;
-  studyField: number;
+  fbLink: string;
+  studyField: string;
   studyLevel: number;
-  chapters: string;
+  chapters: string[];
   description: string;
+
+  static cursedFacebookLinks = [
+    'https://m.facebook.com/profile.php?ref=bookmarks',
+    'https://m.facebook.com/?locale2=fr_FR',
+    'https://m.facebook.com/',
+    'https://m.facebook.com/profile.php?ref=bookmarks',
+    'https://m.facebook.com/home.php',
+  ];
+
   static headerTransformer = (index: number) =>
     [
       'timestamp',
@@ -49,15 +59,36 @@ export class RawInscriptionInfo {
       'description',
     ][index];
 
-  static numberTransformer = (value: string, field: string | number) => {
+  static transformer = (value: string, field: string | number) => {
     switch (field) {
       case 'studyLevel':
       case 'phone':
         return Number.parseInt(value.replace(' ', ''));
       case 'chapters':
         return Array.from(value.match(chaptersPattern));
+      case 'fbLink':
+        return RawInscriptionInfo.cursedFacebookLinks.find((e) => e === value)
+          ? null
+          : value.trim();
       default:
         return value;
     }
   };
+
+  static toMember(e: RawInscriptionInfo): Prisma.MemberCreateInput {
+    return {
+      fullName: `${e.firstName} ${e.lastName}`.trim(),
+      gender: e.gender == 'Male' ? Gender.male : Gender.female,
+      fbLink: e.fbLink,
+      phone: e.phone,
+      email: e.email.trim(),
+      studyField: e.studyField,
+      studyLevel: e.studyLevel,
+      // chapters: {
+      //   connect: e.chapters.map((e) => ({
+      //     acronym: e,
+      //   })),
+      // },
+    };
+  }
 }
