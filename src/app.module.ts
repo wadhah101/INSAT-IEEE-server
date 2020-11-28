@@ -6,9 +6,9 @@ import { RunnerService } from './runner/runner.service';
 import { PartnerModule } from './partner/partner.module';
 import { QrCodeModule } from './qr-code/qr-code.module';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
-import { GoogleDriveService } from './google-drive/google-drive.service';
-import { GoogleDriveModule } from './google-drive/google-drive.module';
-import { RawCardInfoModule } from './raw-card-info/raw-card-info.module';
+import { GoogleDriveService } from './utils/google-drive/google-drive.service';
+import { GoogleDriveModule } from './utils/google-drive/google-drive.module';
+import { RawCardInfoModule } from './utils/raw/raw-card-info/raw-card-info.module';
 
 @Module({
   imports: [
