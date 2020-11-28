@@ -8,6 +8,7 @@ declare global {
       DATABASE_URL: string;
       INSCRIPTION_DATA: string;
       PICTURE_STORAGE_LOCATION: string;
+      PICTURE_STORAGE_LOCATION_RAW: string;
     }
   }
 }

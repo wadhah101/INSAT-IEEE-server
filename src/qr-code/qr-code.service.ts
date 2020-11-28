@@ -61,12 +61,9 @@ export class QrCodeService {
   }
 }
 
+// TODO
 function accountExpired(memeber: Member & { ieeeAccount: IEEEAccount }) {
   const Difference_In_Time =
-    new Date().getTime() - memeber.ieeeAccount.registrationDate.getTime();
-
-  // To calculate the no. of days between two dates
-  const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-
-  return Difference_In_Days > 365 * 1.5;
+    new Date().getTime() - memeber.ieeeAccount.expirationDate.getTime();
+  return Difference_In_Time > 0;
 }

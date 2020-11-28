@@ -1,0 +1,17 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "IEEEAccount",
+      "field": "expirationDate",
+      "type": "DateTime",
+      "arity": "Optional"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "IEEEAccount",
+      "field": "registrationDate"
+    }
+  ]
+}

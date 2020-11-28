@@ -8,15 +8,18 @@ import { env } from 'process';
 export class GoogleDriveService {
   async downloadFilesFromIds(ids: string[]) {
     const auth = await fullAuth();
+    console.log('meta download Started');
     const idsReq = ids.map((e) => downloadFiles(auth, e));
     const res = await Promise.all(idsReq);
-    console.log('download Started');
     const work = res.map((e) => {
       const file = fs.createWriteStream(
         join(env.PICTURE_STORAGE_LOCATION, e.fileId),
       );
       return new Promise<string>((resolve, reject) => {
-        e.data.on('end', () => resolve(e.fileId));
+        e.data.on('end', () => {
+          console.log('download', e.fileId);
+          return resolve(e.fileId);
+        });
         e.data.on('error', (error) => reject(error)).pipe(file);
       });
     });

@@ -4,11 +4,12 @@ import { Member } from '@prisma/client';
 import { env } from 'process';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { toFile as QrFile } from 'qrcode';
-import { join as fsJoin } from 'path';
+import { join as fsJoin, join } from 'path';
 import { GoogleDriveService } from 'src/utils/google-drive/google-drive.service';
 import * as fs from 'fs';
 import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
 import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
+import * as fileType from 'file-type';
 
 @Injectable()
 export class MemberService {
@@ -65,17 +66,10 @@ export class MemberService {
   }
 
   async seedFromCardForm() {
+    const pattern = /id=(.*)/;
     const raw = this.rawCardInfoService.cardData;
 
     const res = await this.prisma.member.findMany();
-
-    const inPerviousForm = raw.filter((e) =>
-      res.find(
-        (e2) =>
-          e.personalMail.toUpperCase() == e2.email.toUpperCase() ||
-          Number(e.phone) === Number(e2.phone),
-      ),
-    );
 
     const [inprev, nonInPrev] = raw.reduce<RawCardInfo[][]>(
       (acc, cur) => {
@@ -90,22 +84,72 @@ export class MemberService {
       [[], []],
     );
 
-    return { inprev, nonInPrev };
+    if (inprev.length)
+      throw new HttpException(
+        `there is previous people ${inprev}`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+
+    const req = nonInPrev.map((e) =>
+      this.prisma.member.create({
+        data: {
+          fullName: e.fullName,
+          email: e.personalMail,
+          phone: Number(e.phone),
+          imageDriveId: e.picture.match(pattern)[1],
+          ieeeAccount: {
+            create: {
+              id: Number(e.ieeeId),
+              email: e.ieeeMail,
+              expirationDate:
+                e.accountActivation === 'Before August 2020'
+                  ? new Date(2020, 11, 31)
+                  : new Date(2021, 11, 31),
+            },
+          },
+        },
+      }),
+    );
+
+    return this.prisma.$transaction(req);
   }
 
-  async DownloadImage(): Promise<string[]> {
+  async downloadImage() {
     const all = await this.prisma.member.findMany();
 
     // get already downloaded pictures
     const currentPictures = await fs.promises.readdir(
-      env.PICTURE_STORAGE_LOCATION,
+      env.PICTURE_STORAGE_LOCATION_RAW,
     );
 
     // get non downloaded ids
     const ids = all
       .map((e) => e.imageDriveId)
-      .filter((e) => currentPictures.find((el) => el === e));
+      .filter((e) => e)
+      .filter((e) => !currentPictures.find((el) => el === e));
 
     return this.googleDriveService.downloadFilesFromIds(ids);
+  }
+
+  async linkImages() {
+    const all = await this.prisma.member.findMany();
+    const data = all.filter((e) => e.imageDriveId);
+
+    const withImages = data.map(async (e) => {
+      const oldPath = join(env.PICTURE_STORAGE_LOCATION_RAW, e.imageDriveId);
+      const c = await fileType.fromFile(oldPath);
+
+      const newName = `${e.fullName} ${e.id}.${c.ext}`;
+      const newPath = join(env.PICTURE_STORAGE_LOCATION, newName);
+
+      await fs.promises.copyFile(oldPath, newPath);
+
+      return { ...e, imageFile: newName };
+    });
+    const currentPictures = await fs.promises.readdir(
+      env.PICTURE_STORAGE_LOCATION,
+    );
+
+    return Promise.all(withImages);
   }
 }
