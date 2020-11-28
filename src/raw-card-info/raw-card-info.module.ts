@@ -6,5 +6,6 @@ import { RawCardInfoController } from './raw-card-info.controller';
 @Module({
   controllers: [RawCardInfoController],
   providers: [RawCardInfoService, PrismaService],
+  exports: [RawCardInfoService],
 })
 export class RawCardInfoModule {}

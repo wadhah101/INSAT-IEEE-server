@@ -11,8 +11,8 @@ import * as Papa from 'papaparse';
 
 @Injectable()
 export class RawCardInfoService implements OnApplicationBootstrap {
-  private cardData: RawCardInfo[];
-  private inscriptionData: RawInscriptionInfo[];
+  public cardData: RawCardInfo[];
+  public inscriptionData: RawInscriptionInfo[];
   async onApplicationBootstrap() {
     const cardFile = await fs.promises.readFile(env.FORM_DATA, 'utf-8');
     this.cardData = Papa.parse<RawCardInfo>(cardFile, {
@@ -37,7 +37,7 @@ export class RawCardInfoService implements OnApplicationBootstrap {
   }
 
   findAll() {
-    return this.inscriptionData;
+    return this.cardData;
   }
 
   findOne(id: number) {

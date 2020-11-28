@@ -7,6 +7,7 @@ declare global {
       FORM_DATA: string;
       DATABASE_URL: string;
       INSCRIPTION_DATA: string;
+      PICTURE_STORAGE_LOCATION: string;
     }
   }
 }

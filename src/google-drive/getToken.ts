@@ -1,6 +1,8 @@
-import { google } from 'googleapis';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { drive_v3, google } from 'googleapis';
 import * as fs from 'fs';
 import * as readline from 'readline';
+import { Stream } from 'stream';
 
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
@@ -65,6 +67,23 @@ function getAccessToken(oAuth2Client, callback) {
   });
 }
 
+export async function downloadFiles(auth, fileId: string) {
+  const drive = google.drive({ version: 'v3', auth });
+  const downloadReq = drive.files
+    .get(
+      {
+        fileId,
+        alt: 'media',
+      },
+      { responseType: 'stream' },
+    )
+    .catch((e) => {
+      throw new HttpException(e, HttpStatus.UNPROCESSABLE_ENTITY);
+    });
+
+  return downloadReq.then(async (e) => ({ fileId, data: await e.data }));
+}
+
 async function listFiles(auth) {
   const drive = google.drive({ version: 'v3', auth });
 
@@ -105,4 +124,15 @@ export async function f() {
   const authToken = await asyncAuthorize(credentiels);
   listFiles(authToken);
   console.log(authToken);
+}
+
+export async function fullAuth() {
+  const credentielsRaw = await fs.promises
+    .readFile('credentials.json')
+    .catch((e) => console.log('Error loading client secret file:', e));
+  if (!credentielsRaw) return;
+
+  const credentiels = JSON.parse(credentielsRaw.toString());
+  const authToken = await asyncAuthorize(credentiels);
+  return authToken;
 }
