@@ -1,0 +1,26 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "DeleteField",
+      "model": "Member",
+      "field": "name"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Member",
+      "field": "lastname"
+    },
+    {
+      "tag": "DeleteDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Member",
+          "field": "fullName"
+        },
+        "directive": "default"
+      }
+    }
+  ]
+}

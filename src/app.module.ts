@@ -8,6 +8,7 @@ import { QrCodeModule } from './qr-code/qr-code.module';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
 import { GoogleDriveService } from './google-drive/google-drive.service';
 import { GoogleDriveModule } from './google-drive/google-drive.module';
+import { RawCardInfoModule } from './raw-card-info/raw-card-info.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { GoogleDriveModule } from './google-drive/google-drive.module';
     PartnerModule,
     QrCodeModule,
     GoogleDriveModule,
+    RawCardInfoModule,
   ],
   controllers: [AppController],
   providers: [AppService, RunnerService],

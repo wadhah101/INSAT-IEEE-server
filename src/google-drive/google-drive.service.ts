@@ -65,6 +65,6 @@ export class GoogleDriveService implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
-    console.log('gdrive init');
+    console.log();
   }
 }
