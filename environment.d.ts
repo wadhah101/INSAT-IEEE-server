@@ -9,7 +9,6 @@ declare global {
       INSCRIPTION_DATA: string;
       PICTURE_STORAGE_LOCATION: string;
       PICTURE_STORAGE_LOCATION_RAW: string;
-      OUTPUT_CSV: string;
     }
   }
 }

@@ -1,6 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Header, Res } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { env } from 'process';
+import { Response } from 'express';
 
 @Controller('member')
 export class MemberController {
@@ -42,9 +43,11 @@ export class MemberController {
     return this.memberService.linkImages();
   }
 
-  @Get('aniscsv')
-  async anisCsv() {
+  @Get('anis.csv')
+  @Header('Content-Type', 'text/csv')
+  async anisCsv(@Res() res: Response) {
     if (env.NODE_ENV === 'production') return [];
-    return this.memberService.exportToAnisCsv();
+    const data = await this.memberService.exportToAnisCsv();
+    data.pipe(res);
   }
 }

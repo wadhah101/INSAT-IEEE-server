@@ -1,4 +1,5 @@
 import { Gender, Prisma } from '@prisma/client';
+import { nameTransformer } from 'src/member/member.service';
 const chaptersPattern = /(PES)|(RAS)|(IAS)|(EMBS)|(CS)|(WIE)/g;
 
 export class RawCardInfo {
@@ -77,7 +78,7 @@ export class RawInscriptionInfo {
 
   static toMember(e: RawInscriptionInfo): Prisma.MemberCreateInput {
     return {
-      fullName: `${e.firstName} ${e.lastName}`.trim(),
+      fullName: nameTransformer(`${e.firstName} ${e.lastName}`),
       gender: e.gender == 'Male' ? Gender.male : Gender.female,
       fbLink: e.fbLink,
       phone: e.phone,

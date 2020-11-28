@@ -12,6 +12,16 @@ import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-car
 import * as fileType from 'file-type';
 import * as papa from 'papaparse';
 
+const namePattern = /(\S*)\s*/g;
+export const nameTransformer = (value: string) =>
+  Array.from(value.matchAll(namePattern))
+    .map((e) => e[1])
+    .map(
+      (e) => e.toLowerCase().charAt(0).toUpperCase() + e.toLowerCase().slice(1),
+    )
+    .join(' ')
+    .trim();
+
 @Injectable()
 export class MemberService {
   constructor(
@@ -100,7 +110,7 @@ export class MemberService {
     const req = nonInPrev.map((e) =>
       this.prisma.member.create({
         data: {
-          fullName: e.fullName.trim(),
+          fullName: nameTransformer(e.fullName),
           email: e.personalMail.trim(),
           phone: Number(e.phone),
           imageDriveId: e.picture.match(pattern)[1],
@@ -174,6 +184,10 @@ export class MemberService {
 
     const result = papa.unparse(data, { quotes: true });
 
-    return fs.promises.writeFile(join(env.OUTPUT_CSV, 'anis.csv'), result);
+    const path = join('/tmp', 'anis.csv');
+
+    await fs.promises.writeFile(path, result);
+
+    return fs.createReadStream(path);
   }
 }
