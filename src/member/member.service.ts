@@ -93,14 +93,14 @@ export class MemberService {
     const req = nonInPrev.map((e) =>
       this.prisma.member.create({
         data: {
-          fullName: e.fullName,
-          email: e.personalMail,
+          fullName: e.fullName.trim(),
+          email: e.personalMail.trim(),
           phone: Number(e.phone),
           imageDriveId: e.picture.match(pattern)[1],
           ieeeAccount: {
             create: {
               id: Number(e.ieeeId),
-              email: e.ieeeMail,
+              email: e.ieeeMail.trim(),
               expirationDate:
                 e.accountActivation === 'Before August 2020'
                   ? new Date(2020, 11, 31)
@@ -133,9 +133,9 @@ export class MemberService {
 
   async linkImages() {
     const all = await this.prisma.member.findMany();
-    const data = all.filter((e) => e.imageDriveId);
+    const data = all.filter((e) => e.imageDriveId && !e.imageFile);
 
-    const withImages = data.map(async (e) => {
+    const withImagesReq = data.map(async (e) => {
       const oldPath = join(env.PICTURE_STORAGE_LOCATION_RAW, e.imageDriveId);
       const c = await fileType.fromFile(oldPath);
 
@@ -146,10 +146,13 @@ export class MemberService {
 
       return { ...e, imageFile: newName };
     });
-    const currentPictures = await fs.promises.readdir(
-      env.PICTURE_STORAGE_LOCATION,
+
+    const withImages = await Promise.all(withImagesReq);
+
+    const updates = withImages.map((e) =>
+      this.prisma.member.update({ where: { id: e.id }, data: e }),
     );
 
-    return Promise.all(withImages);
+    return this.prisma.$transaction(updates);
   }
 }
