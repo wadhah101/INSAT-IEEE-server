@@ -1,5 +1,9 @@
-import { RawCardInfo } from './../utils/raw/raw-card-info/entities/raw-card-info.entity';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  RawCardInfo,
+  ieeeAccountFactory,
+  nameTransformer,
+} from './../utils/raw/raw-card-info/entities/raw-card-info.entity';
+import { Injectable } from '@nestjs/common';
 import { Member } from '@prisma/client';
 import { env } from 'process';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,16 +15,6 @@ import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.se
 import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
 import * as fileType from 'file-type';
 import * as papa from 'papaparse';
-
-const namePattern = /(\S*)\s*/g;
-export const nameTransformer = (value: string) =>
-  Array.from(value.matchAll(namePattern))
-    .map((e) => e[1])
-    .map(
-      (e) => e.toLowerCase().charAt(0).toUpperCase() + e.toLowerCase().slice(1),
-    )
-    .join(' ')
-    .trim();
 
 @Injectable()
 export class MemberService {
@@ -88,26 +82,37 @@ export class MemberService {
     const res = await this.prisma.member.findMany();
 
     // classify members into two group ,  based on inscription form user record existance
-    const [inprev, nonInPrev] = raw.reduce<RawCardInfo[][]>(
+    const [inprev, nonInPrev] = raw.reduce<
+      [{ inscription: Member; card: RawCardInfo }[], RawCardInfo[]]
+    >(
       (acc, cur) => {
-        const isInPrev = !!res.find(
+        const isInPrev = res.find(
           (e2) =>
             cur.personalMail.toUpperCase() == e2.email.toUpperCase() ||
             Number(cur.phone) === Number(e2.phone),
         );
-        acc[isInPrev ? 0 : 1].push(cur);
+        if (isInPrev) acc[0].push({ inscription: isInPrev, card: cur });
+        else acc[1].push(cur);
         return acc;
       },
       [[], []],
     );
 
-    if (inprev.length)
-      throw new HttpException(
-        `there is previous people ${inprev}`,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+    // TODO reduce code
+    const inPrevWork = inprev.map((e) =>
+      this.prisma.member.update({
+        where: { id: e.inscription.id },
+        data: {
+          imageDriveId: e.card.picture.match(pattern)[1],
+          ieeeAccount: {
+            create: ieeeAccountFactory(e.card),
+          },
+        },
+      }),
+    );
+    await this.prisma.$transaction(inPrevWork);
 
-    const req = nonInPrev.map((e) =>
+    const nonInPrevWork = nonInPrev.map((e) =>
       this.prisma.member.create({
         data: {
           fullName: nameTransformer(e.fullName),
@@ -115,20 +120,12 @@ export class MemberService {
           phone: Number(e.phone),
           imageDriveId: e.picture.match(pattern)[1],
           ieeeAccount: {
-            create: {
-              id: Number(e.ieeeId),
-              email: e.ieeeMail.trim(),
-              expirationDate:
-                e.accountActivation === 'Before August 2020'
-                  ? new Date(2020, 11, 31)
-                  : new Date(2021, 11, 31),
-            },
+            create: ieeeAccountFactory(e),
           },
         },
       }),
     );
-
-    return this.prisma.$transaction(req);
+    return this.prisma.$transaction(nonInPrevWork);
   }
 
   async downloadImage() {

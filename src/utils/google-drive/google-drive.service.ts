@@ -13,7 +13,7 @@ export class GoogleDriveService {
     const res = await Promise.all(idsReq);
     const work = res.map((e) => {
       const file = fs.createWriteStream(
-        join(env.PICTURE_STORAGE_LOCATION, e.fileId),
+        join(env.PICTURE_STORAGE_LOCATION_RAW, e.fileId),
       );
       return new Promise<string>((resolve, reject) => {
         e.data.on('end', () => {

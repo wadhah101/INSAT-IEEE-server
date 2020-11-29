@@ -1,6 +1,15 @@
 import { Gender, Prisma } from '@prisma/client';
-import { nameTransformer } from 'src/member/member.service';
 const chaptersPattern = /(PES)|(RAS)|(IAS)|(EMBS)|(CS)|(WIE)/g;
+
+const namePattern = /(\S*)\s*/g;
+export const nameTransformer = (value: string) =>
+  Array.from(value.matchAll(namePattern))
+    .map((e) => e[1])
+    .map(
+      (e) => e.toLowerCase().charAt(0).toUpperCase() + e.toLowerCase().slice(1),
+    )
+    .join(' ')
+    .trim();
 
 export class RawCardInfo {
   timestamp: string;
@@ -85,11 +94,16 @@ export class RawInscriptionInfo {
       email: e.email.trim(),
       studyField: e.studyField,
       studyLevel: e.studyLevel,
-      // chapters: {
-      //   connect: e.chapters.map((e) => ({
-      //     acronym: e,
-      //   })),
-      // },
     };
   }
 }
+
+// ieee acount factory
+export const ieeeAccountFactory = (e: RawCardInfo) => ({
+  id: Number(e.ieeeId),
+  email: e.ieeeMail.trim(),
+  expirationDate:
+    e.accountActivation === 'Before August 2020'
+      ? new Date(2020, 11, 31)
+      : new Date(2021, 11, 31),
+});
