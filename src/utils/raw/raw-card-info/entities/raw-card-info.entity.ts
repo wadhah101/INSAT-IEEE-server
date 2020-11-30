@@ -47,7 +47,9 @@ export class RawInscriptionInfo {
   description: string;
 
   static cursedFacebookLinks = [
-    'https://m.facebook.com/profile.php?ref=bookmarks',
+    'https://www.facebook.com/',
+    'https://www.facebook.com/profile',
+    'https://m.facebook.com/?_rdr',
     'https://m.facebook.com/?locale2=fr_FR',
     'https://m.facebook.com/',
     'https://m.facebook.com/profile.php?ref=bookmarks',

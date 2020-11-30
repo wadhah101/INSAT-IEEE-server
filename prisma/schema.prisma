@@ -20,7 +20,7 @@ model Member {
   gender       Gender?
   imageDriveId String?      @unique
   imageFile    String?      @unique
-  fbLink       String?      @unique
+  fbLink       String?      
   phone        Int?         @unique
   email        String?      @unique
   studyField   String?
