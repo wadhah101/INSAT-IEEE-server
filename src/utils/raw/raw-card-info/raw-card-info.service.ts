@@ -16,6 +16,7 @@ export class RawCardInfoService implements OnApplicationBootstrap {
     this.cardData = Papa.parse<RawCardInfo>(cardFile, {
       header: true,
       transformHeader: (_, ind) => RawCardInfo.headerTransformer(ind),
+      transform: (value) => value.trim(),
     }).data;
 
     const inscriptionFile = await fs.promises.readFile(
@@ -26,7 +27,7 @@ export class RawCardInfoService implements OnApplicationBootstrap {
     this.inscriptionData = Papa.parse<RawInscriptionInfo>(inscriptionFile, {
       header: true,
       transformHeader: (_, ind) => RawInscriptionInfo.headerTransformer(ind),
-      transform: (e, field) => RawInscriptionInfo.transformer(e, field),
+      transform: (e, field) => RawInscriptionInfo.transformer(e.trim(), field),
     }).data;
   }
 }

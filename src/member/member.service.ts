@@ -1,6 +1,5 @@
 import {
   RawCardInfo,
-  ieeeAccountFactory,
   nameTransformer,
 } from './../utils/raw/raw-card-info/entities/raw-card-info.entity';
 import { Injectable } from '@nestjs/common';
@@ -15,6 +14,7 @@ import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.se
 import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
 import * as fileType from 'file-type';
 import * as papa from 'papaparse';
+import { ieeeAccountFactory } from './dto/create-member.dto';
 
 @Injectable()
 export class MemberService {
@@ -98,7 +98,6 @@ export class MemberService {
       [[], []],
     );
 
-    // TODO reduce code
     const inPrevWork = inprev.map((e) =>
       this.prisma.member.update({
         where: { id: e.inscription.id },
@@ -116,7 +115,7 @@ export class MemberService {
       this.prisma.member.create({
         data: {
           fullName: nameTransformer(e.fullName),
-          email: e.personalMail.trim(),
+          email: e.personalMail,
           phone: Number(e.phone),
           imageDriveId: e.picture.match(pattern)[1],
           ieeeAccount: {

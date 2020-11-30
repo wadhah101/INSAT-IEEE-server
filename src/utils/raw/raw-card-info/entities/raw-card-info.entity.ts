@@ -16,8 +16,8 @@ export class RawCardInfo {
   fullName: string;
   ieeeMail: string;
   personalMail: string;
-  phone: number;
-  ieeeId: number;
+  phone: string;
+  ieeeId: string;
   accountActivation: string;
   picture: string;
   static headerTransformer = (index: number) =>
@@ -79,7 +79,7 @@ export class RawInscriptionInfo {
       case 'fbLink':
         return RawInscriptionInfo.cursedFacebookLinks.find((e) => e === value)
           ? null
-          : value.trim();
+          : value;
       default:
         return value;
     }
@@ -91,19 +91,9 @@ export class RawInscriptionInfo {
       gender: e.gender == 'Male' ? Gender.male : Gender.female,
       fbLink: e.fbLink,
       phone: e.phone,
-      email: e.email.trim(),
+      email: e.email,
       studyField: e.studyField,
       studyLevel: e.studyLevel,
     };
   }
 }
-
-// ieee acount factory
-export const ieeeAccountFactory = (e: RawCardInfo) => ({
-  id: Number(e.ieeeId),
-  email: e.ieeeMail.trim(),
-  expirationDate:
-    e.accountActivation === 'Before August 2020'
-      ? new Date(2020, 11, 31)
-      : new Date(2021, 11, 31),
-});
