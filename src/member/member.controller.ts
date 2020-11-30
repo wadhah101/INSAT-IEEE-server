@@ -1,52 +1,60 @@
-import { Controller, Get, Header, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  Res,
+  SetMetadata,
+  UseGuards,
+} from '@nestjs/common';
 import { MemberService } from './member.service';
-import { env } from 'process';
 import { Response } from 'express';
+import { LocalGuard } from 'src/guards/local-guard/local.guard';
 
 @Controller('member')
+@UseGuards(LocalGuard)
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
 
+  @SetMetadata('NODE_ENV', 'development')
   @Get()
   async findAll() {
-    if (env.NODE_ENV === 'production') return [];
     return this.memberService.findAll();
   }
 
+  @SetMetadata('NODE_ENV', 'development')
   @Get('gen-qrs')
   async genqQrs(): Promise<string[]> {
-    if (env.NODE_ENV === 'production') return [];
     return this.memberService.genqQrs();
   }
 
+  @SetMetadata('NODE_ENV', 'development')
   @Get('seed/inscription')
   async seedFromInscription() {
-    if (env.NODE_ENV === 'production') return [];
     return this.memberService.seedFromInscription();
   }
 
+  @SetMetadata('NODE_ENV', 'development')
   @Get('seed/cards')
   async seedFrom() {
-    if (env.NODE_ENV === 'production') return [];
     return this.memberService.seedFromCardForm();
   }
 
+  @SetMetadata('NODE_ENV', 'development')
   @Get('downloadPics')
   async downloadPics() {
-    if (env.NODE_ENV === 'production') return [];
     return this.memberService.downloadImage();
   }
 
+  @SetMetadata('NODE_ENV', 'development')
   @Get('linkPics')
   async linkPics() {
-    if (env.NODE_ENV === 'production') return [];
     return this.memberService.linkImages();
   }
 
+  @SetMetadata('NODE_ENV', 'development')
   @Get('anis.csv')
   @Header('Content-Type', 'text/csv')
   async anisCsv(@Res() res: Response) {
-    if (env.NODE_ENV === 'production') return [];
     const data = await this.memberService.exportToAnisCsv();
     data.pipe(res);
   }
