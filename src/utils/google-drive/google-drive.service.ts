@@ -11,13 +11,14 @@ export class GoogleDriveService {
     console.log('meta download Started');
     const idsReq = ids.map((e) => downloadFiles(auth, e));
     const res = await Promise.all(idsReq);
+    let counter = 0;
     const work = res.map((e) => {
       const file = fs.createWriteStream(
         join(env.PICTURE_STORAGE_LOCATION_RAW, e.fileId),
       );
       return new Promise<string>((resolve, reject) => {
         e.data.on('end', () => {
-          console.log('download', e.fileId);
+          console.log('download', e.fileId, `${++counter}/${ids.length}`);
           return resolve(e.fileId);
         });
         e.data.on('error', (error) => reject(error)).pipe(file);

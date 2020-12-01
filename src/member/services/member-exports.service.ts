@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { join } from 'path';
 import * as Papa from 'papaparse';
 import { env } from 'process';
-import { toFile as QrFile } from 'qrcode';
+import * as qr from 'qrcode';
 
 @Injectable()
 export class MemberExportsService {
@@ -37,7 +37,7 @@ export class MemberExportsService {
     }));
 
     const codes = files.map((e) =>
-      QrFile(e.path, e.data, {
+      qr.toFile(e.path, e.data, {
         margin: 1,
         scale: 20,
       }),

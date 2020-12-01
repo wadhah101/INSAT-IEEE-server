@@ -59,31 +59,41 @@ export class MemberService {
       },
       [[], []],
     );
-    const inPrevWork = inprev.map((e) =>
-      this.prisma.member.update({
+    const inPrevWork = inprev.map((e) => {
+      const account = ieeeAccountFactory(e.card);
+      return this.prisma.member.update({
         where: { id: e.inscription.id },
         data: {
           imageDriveId: e.card.picture.match(pattern)[1],
-          ieeeAccount: {
-            create: ieeeAccountFactory(e.card),
-          },
+          ieeeAccount: account
+            ? {
+                create: account,
+              }
+            : undefined,
         },
-      }),
-    );
+      });
+    });
+
+    console.log(inprev);
+
     await this.prisma.$transaction(inPrevWork);
-    const nonInPrevWork = nonInPrev.map((e) =>
-      this.prisma.member.create({
+
+    const nonInPrevWork = nonInPrev.map((e) => {
+      const account = ieeeAccountFactory(e);
+      return this.prisma.member.create({
         data: {
           fullName: nameTransformer(e.fullName),
           email: e.personalMail,
           phone: Number(e.phone),
           imageDriveId: e.picture.match(pattern)[1],
-          ieeeAccount: {
-            create: ieeeAccountFactory(e),
-          },
+          ieeeAccount: account
+            ? {
+                create: account,
+              }
+            : undefined,
         },
-      }),
-    );
+      });
+    });
     return this.prisma.$transaction(nonInPrevWork);
   }
 }
