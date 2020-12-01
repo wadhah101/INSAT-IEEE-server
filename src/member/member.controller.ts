@@ -1,3 +1,4 @@
+import { bufferToStream } from './../utils/functions';
 import { MemberExportsService } from './services/member-exports.service';
 import { MemberPicturesService } from './services/member-pictures.service';
 import {
@@ -7,6 +8,7 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Res,
   SetMetadata,
   UploadedFile,
   UseGuards,
@@ -16,6 +18,8 @@ import { MemberService } from './services/member.service';
 import { LocalGuard } from 'src/guards/local-guard/local.guard';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
 import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
+import * as AdmZip from 'adm-zip';
+import { Response } from 'express';
 
 @Controller('member')
 @UseGuards(LocalGuard)
@@ -34,9 +38,18 @@ export class MemberController {
   }
 
   @SetMetadata('NODE_ENV', 'development')
-  @Get('gen-qrs')
-  async genqQrs(): Promise<string[]> {
-    return this.memberExportsService.genqQrs();
+  @Get('gen-qrs.zip')
+  @Header('Content-Type', 'application/zip')
+  async genqQrs(@Res() res: Response) {
+    const zip = new AdmZip();
+    const result = await this.memberExportsService.genqQrs();
+
+    result.forEach((e) => {
+      zip.addFile(e.name, e.buffer);
+    });
+
+    const out = bufferToStream(zip.toBuffer());
+    out.pipe(res);
   }
 
   @SetMetadata('NODE_ENV', 'development')

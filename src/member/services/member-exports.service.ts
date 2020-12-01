@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { join } from 'path';
 import * as Papa from 'papaparse';
-import { env } from 'process';
 import * as qr from 'qrcode';
 
 @Injectable()
@@ -26,23 +24,20 @@ export class MemberExportsService {
     return result;
   }
 
-  async genqQrs(): Promise<string[]> {
+  async genqQrs() {
     const c = await this.prisma.member.findMany({
       select: { id: true },
       where: { imageFile: { not: null } },
     });
-    const files = c.map((e) => ({
-      path: join(env.OUTPUT_QR, `${e.id}.png`),
-      data: e.id,
-    }));
 
-    const codes = files.map((e) =>
-      qr.toFile(e.path, e.data, {
+    const codesReq = c.map(async (e) => ({
+      name: `${e.id}.png`,
+      buffer: await qr.toBuffer(e.id, {
         margin: 1,
         scale: 20,
       }),
-    );
-    await Promise.all(codes);
-    return files.map((e) => e.path);
+    }));
+
+    return Promise.all(codesReq);
   }
 }
