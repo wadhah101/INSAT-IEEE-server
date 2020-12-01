@@ -1,7 +1,5 @@
-import {
-  RawCardInfo,
-  RawInscriptionInfo,
-} from './entities/raw-card-info.entity';
+import { RawCardInfo } from './entities/raw-card-info.entity';
+import { RawInscriptionInfo } from './entities/raw-inscription-info.entity';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { env } from 'process';
 import { promises as fs } from 'fs';

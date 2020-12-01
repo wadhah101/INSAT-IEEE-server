@@ -11,7 +11,7 @@ import { join as fsJoin, join } from 'path';
 import { GoogleDriveService } from 'src/utils/google-drive/google-drive.service';
 import * as fs from 'fs';
 import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
-import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
+import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-inscription-info.entity';
 import * as fileType from 'file-type';
 import * as papa from 'papaparse';
 import { ieeeAccountFactory } from './dto/create-member.dto';
