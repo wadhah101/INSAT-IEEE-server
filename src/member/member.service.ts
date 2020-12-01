@@ -50,8 +50,10 @@ export class MemberService {
 
   // takes data from inscription form csv and inserts it into database
   async seedFromInscription() {
+    const temp = await this.rawCardInfoService.inscriptionData;
+
     // only leave unique inputs
-    const raw = this.rawCardInfoService.inscriptionData
+    const raw = temp
       .map((e) => RawInscriptionInfo.toMember(e))
       .filter(
         (e, ind, arr) =>

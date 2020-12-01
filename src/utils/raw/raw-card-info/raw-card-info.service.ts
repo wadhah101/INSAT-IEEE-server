@@ -10,31 +10,51 @@ import * as Papa from 'papaparse';
 @Injectable()
 export class RawCardInfoService implements OnModuleInit {
   public cardData: Promise<RawCardInfo[]>;
-  public inscriptionData: RawInscriptionInfo[];
-  async onModuleInit() {
-    // card form csv file location
-    const cardFile = await fs.readFile(env.FORM_DATA, 'utf-8');
+  public inscriptionData: Promise<RawInscriptionInfo[]>;
 
-    // csv parsing
-    const CardInfoReq = Papa.parse<RawCardInfo>(cardFile, {
-      header: true,
-      transformHeader: (_, ind) => RawCardInfo.headerTransformer(ind),
-      transform: (value) => value.trim(),
-    }).data.map(async (e) => {
-      await RawCardInfo.schema.validate(e);
-      return e;
+  // variables initiliazation
+  onModuleInit() {
+    // card form csv file location
+    const cardFile = fs.readFile(env.FORM_DATA, 'utf-8');
+
+    // non blocking csv parsing
+    const CardInfoReq = cardFile
+      .then(
+        (file) =>
+          Papa.parse<RawCardInfo>(file, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: (_, ind) => RawCardInfo.headerTransformer(ind),
+            transform: (value) => value.trim(),
+          }).data,
+      )
+      .then((e) =>
+        Promise.all(
+          e.map(async (e) => {
+            await RawCardInfo.schema.validate(e);
+            return e;
+          }),
+        ),
+      );
+
+    this.cardData = CardInfoReq.catch((e) => {
+      console.error(e);
+      return null;
     });
 
-    this.cardData = Promise.all(CardInfoReq);
-
     // inscription form csv data
-    const inscriptionFile = await fs.readFile(env.INSCRIPTION_DATA, 'utf-8');
+    const inscriptionFile = fs.readFile(env.INSCRIPTION_DATA, 'utf-8');
 
-    // csv parsing
-    this.inscriptionData = Papa.parse<RawInscriptionInfo>(inscriptionFile, {
-      header: true,
-      transformHeader: (_, ind) => RawInscriptionInfo.headerTransformer(ind),
-      transform: (e, field) => RawInscriptionInfo.transformer(e.trim(), field),
-    }).data;
+    // non blocking csv parsing
+    this.inscriptionData = inscriptionFile.then(
+      (file) =>
+        Papa.parse<RawInscriptionInfo>(file, {
+          header: true,
+          transformHeader: (_, ind) =>
+            RawInscriptionInfo.headerTransformer(ind),
+          transform: (e, field) =>
+            RawInscriptionInfo.transformer(e.trim(), field),
+        }).data,
+    );
   }
 }

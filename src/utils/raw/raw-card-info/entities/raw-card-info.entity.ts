@@ -26,10 +26,10 @@ export class RawCardInfo {
   static schema = yup.object().shape<RawCardInfo>({
     timestamp: null,
     fullName: yup.string().required(),
-    ieeeMail: yup.string().matches(/.+@ieee\.org/),
+    ieeeMail: yup.string().matches(/.+@ieee\.org|/),
     personalMail: yup.string().required().email(),
     phone: yup.string().required(),
-    ieeeId: yup.string().matches(/[0-9]{8}/),
+    ieeeId: yup.string().matches(/[0-9]{8}|/),
     accountActivation: yup.string(),
     picture: yup.string().required().url(),
   });
