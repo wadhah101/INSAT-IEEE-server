@@ -139,7 +139,8 @@ export class MemberService {
     const ids = all.map((e) => e.imageDriveId);
     if (!ids.length) return [];
 
-    return this.googleDriveService.downloadFilesFromIds(ids);
+    await this.googleDriveService.downloadFilesFromIds(ids);
+    return this.linkImages();
   }
 
   async linkImages() {

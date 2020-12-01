@@ -19,18 +19,17 @@ export class RawCardInfoService implements OnModuleInit {
 
     // non blocking csv parsing
     const CardInfoReq = cardFile
-      .then(
-        (file) =>
-          Papa.parse<RawCardInfo>(file, {
-            header: true,
-            skipEmptyLines: true,
-            transformHeader: (_, ind) => RawCardInfo.headerTransformer(ind),
-            transform: (value) => value.trim(),
-          }).data,
+      .then((file) =>
+        Papa.parse<RawCardInfo>(file, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: (_, ind) => RawCardInfo.headerTransformer(ind),
+          transform: (value) => value.trim(),
+        }),
       )
       .then((e) =>
         Promise.all(
-          e.map(async (e) => {
+          e.data.map(async (e) => {
             await RawCardInfo.schema.validate(e);
             return e;
           }),
