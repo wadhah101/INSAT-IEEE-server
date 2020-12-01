@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { MemberService } from './../member/member.service';
+import { MemberService } from '../member/services/member.service';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 
 @Injectable()

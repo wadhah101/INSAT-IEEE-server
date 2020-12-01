@@ -1,0 +1,63 @@
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+}
+
+model Chapter {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  acronym String   @unique
+  members Member[]
+}
+
+model Member {
+  id           String       @id @default(cuid())
+  fullName     String
+  gender       Gender?
+  imageDriveId String?      @unique
+  imageFile    String?      @unique
+  fbLink       String?      
+  phone        Int?         @unique
+  email        String?      @unique
+  studyField   String?
+  studyLevel   Int?
+  ieeeAccount  IEEEAccount?
+  chapters     Chapter[]
+  qrScans      QrScan[]
+}
+
+model IEEEAccount {
+  id             Int       @id
+  email          String    @unique
+  expirationDate DateTime?
+  member         Member    @relation(fields: [memberId], references: [id])
+  memberId       String
+}
+
+model Partner {
+  id      Int      @id @default(autoincrement())
+  name    String
+  code    String   @unique
+  email   String   @unique
+  active  Boolean  @default(true)
+  rate    Int?
+  qrScans QrScan[]
+}
+
+model QrScan {
+  id        Int      @id @default(autoincrement())
+  member    Member   @relation(fields: [memberId], references: [id])
+  partner   Partner  @relation(fields: [partnerId], references: [id])
+  date      DateTime
+  memberId  String
+  partnerId Int
+}
+
+enum Gender {
+  male
+  female
+}
