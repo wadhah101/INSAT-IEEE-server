@@ -1,4 +1,6 @@
 import { Gender, Prisma } from '@prisma/client';
+import * as yup from 'yup'; // for everything
+
 const chaptersPattern = /(PES)|(RAS)|(IAS)|(EMBS)|(CS)|(WIE)/g;
 
 const namePattern = /(\S*)\s*/g;
@@ -20,6 +22,18 @@ export class RawCardInfo {
   ieeeId: string;
   accountActivation: string;
   picture: string;
+
+  static schema = yup.object().shape<RawCardInfo>({
+    timestamp: null,
+    fullName: yup.string().required(),
+    ieeeMail: yup.string().matches(/.+@ieee\.org/),
+    personalMail: yup.string().required().email(),
+    phone: yup.string().required(),
+    ieeeId: yup.string().matches(/[0-9]{8}/),
+    accountActivation: yup.string(),
+    picture: yup.string().required().url(),
+  });
+
   static headerTransformer = (index: number) =>
     [
       'timestamp',

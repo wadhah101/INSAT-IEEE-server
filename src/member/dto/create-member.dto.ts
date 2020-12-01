@@ -2,11 +2,9 @@ import { RawCardInfo } from 'src/utils/raw/raw-card-info/entities/raw-card-info.
 
 export class CreateMemberDto {}
 
-const ieeeMailPattern = /.*@ieee\.org/;
-const ieeeIdPattern = /^[0-9]{8}$/;
 // ieee acount factory
 export const ieeeAccountFactory = (e: RawCardInfo) =>
-  e.ieeeMail.match(ieeeMailPattern) && e.ieeeId.match(ieeeIdPattern)
+  e.ieeeMail && e.ieeeId
     ? {
         id: Number(e.ieeeId),
         email: e.ieeeMail,

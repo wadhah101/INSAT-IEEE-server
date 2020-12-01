@@ -77,7 +77,7 @@ export class MemberService {
   // takes data from cardForm csv and either links it with old member or creates new member
   async seedFromCardForm() {
     const pattern = /id=(.*)/;
-    const raw = this.rawCardInfoService.cardData;
+    const raw = await this.rawCardInfoService.cardData;
 
     const res = await this.prisma.member.findMany();
 
