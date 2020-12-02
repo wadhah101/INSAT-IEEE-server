@@ -4,10 +4,10 @@ export class CreateMemberDto {}
 
 // ieee acount factory
 export const ieeeAccountFactory = (e: RawCardInfo) =>
-  e.ieeeMail && e.ieeeId
+  e.ieeeId
     ? {
         id: Number(e.ieeeId),
-        email: e.ieeeMail,
+        email: e.ieeeMail || null,
         expirationDate:
           e.accountActivation === 'Before August 2020'
             ? new Date(2020, 11, 31)

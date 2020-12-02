@@ -16,14 +16,16 @@ export class MemberPicturesService {
   async downloadImage() {
     const all = await this.prisma.member.findMany({
       select: { imageDriveId: true },
-      where: { imageDriveId: { not: null }, imageFile: { equals: null } },
+      where: { imageDriveId: { not: null } },
     });
 
-    // get non downloaded ids
-    const ids = all.map((e) => e.imageDriveId);
-    if (!ids.length) return [];
+    const downloadedImages = await fs.readdir(env.PICTURE_STORAGE_LOCATION_RAW);
 
-    await this.googleDriveService.downloadFilesFromIds(ids);
+    // get non downloaded ids
+    const ids = all
+      .map((e) => e.imageDriveId)
+      .filter((e) => !downloadedImages.find((el) => el === e));
+    if (ids.length) await this.googleDriveService.downloadFilesFromIds(ids);
     return this.linkImages();
   }
 

@@ -3,6 +3,20 @@ import { nameTransformer } from './raw-card-info.entity';
 
 const chaptersPattern = /(PES)|(RAS)|(IAS)|(EMBS)|(CS)|(WIE)/g;
 
+export interface IRawInscriptionInfo {
+  timestamp: string;
+  firstName: string;
+  lastName: string;
+  gender: 'Male' | 'Female';
+  email: string;
+  phone: number;
+  fbLink: string;
+  studyField: string;
+  studyLevel: number;
+  chapters: string[];
+  description: string;
+}
+
 export class RawInscriptionInfo {
   timestamp: string;
   firstName: string;
@@ -15,6 +29,10 @@ export class RawInscriptionInfo {
   studyLevel: number;
   chapters: string[];
   description: string;
+
+  static clone(e: IRawInscriptionInfo) {
+    return Object.assign(new RawInscriptionInfo(), e);
+  }
 
   static cursedFacebookLinks = [
     'https://www.facebook.com/',
@@ -57,15 +75,15 @@ export class RawInscriptionInfo {
     }
   };
 
-  static toMember(e: RawInscriptionInfo): Prisma.MemberCreateInput {
+  toMember(): Prisma.MemberCreateInput {
     return {
-      fullName: nameTransformer(`${e.firstName} ${e.lastName}`),
-      gender: e.gender == 'Male' ? Gender.male : Gender.female,
-      fbLink: e.fbLink,
-      phone: e.phone,
-      email: e.email,
-      studyField: e.studyField,
-      studyLevel: e.studyLevel,
+      fullName: nameTransformer(`${this.firstName} ${this.lastName}`),
+      gender: this.gender == 'Male' ? Gender.male : Gender.female,
+      fbLink: this.fbLink,
+      phone: this.phone,
+      email: this.email.toLowerCase(),
+      studyField: this.studyField,
+      studyLevel: this.studyLevel,
     };
   }
 }

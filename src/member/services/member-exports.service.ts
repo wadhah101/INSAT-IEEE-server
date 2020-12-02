@@ -9,11 +9,12 @@ export class MemberExportsService {
 
   async exportToAnisCsv() {
     const raw = await this.prisma.member.findMany({
-      select: { id: true, fullName: true, imageFile: true },
+      select: { id: true, fullName: true, imageFile: true, ieeeAccount: true },
       where: { imageFile: { not: null } },
     });
 
     const data = raw.map((e) => ({
+      ieeeId: e.ieeeAccount?.id,
       fullName: e.fullName,
       imageFile: e.imageFile,
       qrCode: `${e.id}.png`,

@@ -1,12 +1,8 @@
-import {
-  RawCardInfo,
-  nameTransformer,
-} from '../../utils/raw/raw-card-info/entities/raw-card-info.entity';
+import { RawCardInfo } from '../../utils/raw/raw-card-info/entities/raw-card-info.entity';
 import { Injectable } from '@nestjs/common';
 import { Member } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-inscription-info.entity';
-import { ieeeAccountFactory } from '../dto/create-member.dto';
 
 @Injectable()
 export class MemberService {
@@ -20,7 +16,7 @@ export class MemberService {
   async seedFromInscriptionForm(data: RawInscriptionInfo[]) {
     // only leave unique inputs
     const raw = data
-      .map((e) => RawInscriptionInfo.toMember(e))
+      .map((e) => e.toMember())
       .filter(
         (e, ind, arr) =>
           ind ===
@@ -40,7 +36,6 @@ export class MemberService {
 
   // takes data from cardForm csv and either links it with old member or creates new member
   async seedFromCardForm(data: RawCardInfo[]) {
-    const pattern = /id=(.*)/;
     const res = await this.prisma.member.findMany();
 
     // classify members into two group ,  based on inscription form user record existance
@@ -59,41 +54,14 @@ export class MemberService {
       },
       [[], []],
     );
-    const inPrevWork = inprev.map((e) => {
-      const account = ieeeAccountFactory(e.card);
-      return this.prisma.member.update({
-        where: { id: e.inscription.id },
-        data: {
-          imageDriveId: e.card.picture.match(pattern)[1],
-          ieeeAccount: account
-            ? {
-                create: account,
-              }
-            : undefined,
-        },
-      });
-    });
 
-    console.log(inprev);
+    const inPrevWork = inprev.map((e) =>
+      this.prisma.member.update(e.card.linkWithMember(e.inscription.id)),
+    );
 
-    await this.prisma.$transaction(inPrevWork);
-
-    const nonInPrevWork = nonInPrev.map((e) => {
-      const account = ieeeAccountFactory(e);
-      return this.prisma.member.create({
-        data: {
-          fullName: nameTransformer(e.fullName),
-          email: e.personalMail,
-          phone: Number(e.phone),
-          imageDriveId: e.picture.match(pattern)[1],
-          ieeeAccount: account
-            ? {
-                create: account,
-              }
-            : undefined,
-        },
-      });
-    });
-    return this.prisma.$transaction(nonInPrevWork);
+    const nonInPrevWork = nonInPrev.map((e) =>
+      this.prisma.member.create(e.toNewMember()),
+    );
+    return this.prisma.$transaction([...inPrevWork, ...nonInPrevWork]);
   }
 }

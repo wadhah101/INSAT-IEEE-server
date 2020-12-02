@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+import { ieeeAccountFactory } from 'src/member/dto/create-member.dto';
 import * as yup from 'yup'; // for everything
 
 const namePattern = /(\S*)\s*/g;
@@ -10,7 +12,18 @@ export const nameTransformer = (value: string) =>
     .join(' ')
     .trim();
 
-export class RawCardInfo {
+export interface IRawCardInfo {
+  timestamp: string;
+  fullName: string;
+  ieeeMail: string;
+  personalMail: string;
+  phone: string;
+  ieeeId: string;
+  accountActivation: string;
+  picture: string;
+}
+
+export class RawCardInfo implements IRawCardInfo {
   timestamp: string;
   fullName: string;
   ieeeMail: string;
@@ -20,7 +33,45 @@ export class RawCardInfo {
   accountActivation: string;
   picture: string;
 
-  static schema = yup.object().shape<RawCardInfo>({
+  static clone(e: IRawCardInfo) {
+    return Object.assign(new RawCardInfo(), e);
+  }
+
+  static imageDrivePattern = /id=(.*)/;
+
+  linkWithMember(id: string): Prisma.MemberUpdateArgs {
+    const account = ieeeAccountFactory(this);
+    return {
+      where: { id },
+      data: {
+        imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+        ieeeAccount: account
+          ? {
+              create: account,
+            }
+          : undefined,
+      },
+    };
+  }
+
+  toNewMember(): Prisma.MemberCreateArgs {
+    const account = ieeeAccountFactory(this);
+    return {
+      data: {
+        fullName: nameTransformer(this.fullName),
+        email: this.personalMail,
+        phone: Number(this.phone),
+        imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+        ieeeAccount: account
+          ? {
+              create: account,
+            }
+          : undefined,
+      },
+    };
+  }
+
+  static schema = yup.object().shape<IRawCardInfo>({
     timestamp: null,
     fullName: yup.string().required(),
     ieeeMail: yup.string().matches(/.+@ieee\.org|/),
