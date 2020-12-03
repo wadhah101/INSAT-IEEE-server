@@ -65,7 +65,7 @@ export class RawInscriptionInfo {
       case 'phone':
         return Number.parseInt(value.replace(' ', ''));
       case 'chapters':
-        return Array.from(value.match(chaptersPattern));
+        return value.match(chaptersPattern);
       case 'fbLink':
         return RawInscriptionInfo.cursedFacebookLinks.find((e) => e === value)
           ? null
@@ -84,6 +84,11 @@ export class RawInscriptionInfo {
       email: this.email.toLowerCase(),
       studyField: this.studyField,
       studyLevel: this.studyLevel,
+      chapters: {
+        connect: this.chapters.map((acronym) => ({
+          acronym,
+        })),
+      },
     };
   }
 }
