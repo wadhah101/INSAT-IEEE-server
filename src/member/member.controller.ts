@@ -38,8 +38,10 @@ export class MemberController {
   }
 
   @SetMetadata('NODE_ENV', 'development')
-  @Get('gen-qrs.zip')
+  @Get('gen-qrs')
   @Header('Content-Type', 'application/zip')
+  @Header('Content-Disposition', 'attachment; filename=MembersQrCodes.zip')
+  @Header('X-Suggested-Filename', 'MembersQrCodes.zip')
   async genqQrs(@Res() res: Response) {
     const zip = new AdmZip();
     const result = await this.memberExportsService.genqQrs();
@@ -109,9 +111,11 @@ export class MemberController {
   }
 
   @SetMetadata('NODE_ENV', 'development')
-  @Get('anis.csv')
+  @Get('photoshopCSV')
+  @Header('Content-Disposition', 'attachment; filename=data.csv')
+  @Header('X-Suggested-Filename', 'data.csv')
   @Header('Content-Type', 'text/csv')
-  async anisCsv() {
-    return this.memberExportsService.exportToAnisCsv();
+  async photoshopCSV() {
+    return this.memberExportsService.exportToPhotoshopCSV();
   }
 }

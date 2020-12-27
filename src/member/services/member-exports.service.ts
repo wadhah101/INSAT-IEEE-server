@@ -7,7 +7,7 @@ import * as qr from 'qrcode';
 export class MemberExportsService {
   constructor(private prisma: PrismaService) {}
 
-  async exportToAnisCsv() {
+  async exportToPhotoshopCSV() {
     const raw = await this.prisma.member.findMany({
       select: {
         id: true,
@@ -17,9 +17,6 @@ export class MemberExportsService {
       },
       where: { MemberBadge: { isNot: null } },
     });
-
-    //  imageFile: { not: null }
-
     const data = raw.map((e) => ({
       ieeeId: e.ieeeAccount ? e.ieeeAccount.id : null,
       fullName: e.fullName,
@@ -29,7 +26,6 @@ export class MemberExportsService {
     }));
 
     const result = Papa.unparse(data, { quotes: true });
-
     return result;
   }
 
