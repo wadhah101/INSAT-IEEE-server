@@ -30,7 +30,7 @@ export class RawInscriptionInfo {
   chapters: string[];
   description: string;
 
-  static clone(e: IRawInscriptionInfo) {
+  static clone(e: IRawInscriptionInfo): RawInscriptionInfo {
     return Object.assign(new RawInscriptionInfo(), e);
   }
 

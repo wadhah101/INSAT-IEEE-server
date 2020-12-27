@@ -1,33 +1,24 @@
-import { bufferToStream } from './../utils/functions';
-import { MemberExportsService } from './services/member-exports.service';
-import { MemberPicturesService } from './services/member-pictures.service';
 import {
   Controller,
   Get,
-  Header,
   HttpException,
   HttpStatus,
   Post,
-  Res,
   SetMetadata,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { MemberService } from './services/member.service';
+import { MemberService } from '../services/member.service';
 import { LocalGuard } from 'src/guards/local-guard/local.guard';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
 import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
-import * as AdmZip from 'adm-zip';
-import { Response } from 'express';
 
 @Controller('member')
 @UseGuards(LocalGuard)
 export class MemberController {
   constructor(
     private readonly memberService: MemberService,
-    private readonly memberPicturesService: MemberPicturesService,
-    private readonly memberExportsService: MemberExportsService,
     private readonly rawCardInfoService: RawCardInfoService,
   ) {}
 
@@ -35,23 +26,6 @@ export class MemberController {
   @Get()
   async findAll() {
     return this.memberService.findAll();
-  }
-
-  @SetMetadata('NODE_ENV', 'development')
-  @Get('gen-qrs')
-  @Header('Content-Type', 'application/zip')
-  @Header('Content-Disposition', 'attachment; filename=MembersQrCodes.zip')
-  @Header('X-Suggested-Filename', 'MembersQrCodes.zip')
-  async genqQrs(@Res() res: Response) {
-    const zip = new AdmZip();
-    const result = await this.memberExportsService.genqQrs();
-
-    result.forEach((e) => {
-      zip.addFile(e.name, e.buffer);
-    });
-
-    const out = bufferToStream(zip.toBuffer());
-    out.pipe(res);
   }
 
   @SetMetadata('NODE_ENV', 'development')
@@ -102,20 +76,5 @@ export class MemberController {
     );
 
     return this.memberService.seedFromCardForm(data);
-  }
-
-  @SetMetadata('NODE_ENV', 'development')
-  @Get('downloadPics')
-  async downloadPics() {
-    return this.memberPicturesService.downloadImage();
-  }
-
-  @SetMetadata('NODE_ENV', 'development')
-  @Get('photoshopCSV')
-  @Header('Content-Disposition', 'attachment; filename=data.csv')
-  @Header('X-Suggested-Filename', 'data.csv')
-  @Header('Content-Type', 'text/csv')
-  async photoshopCSV() {
-    return this.memberExportsService.exportToPhotoshopCSV();
   }
 }
