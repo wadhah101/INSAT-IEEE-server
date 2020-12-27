@@ -16,7 +16,7 @@ export class MemberPicturesService {
   async downloadImage() {
     const all = await this.prisma.member.findMany({
       select: { MemberBadge: true },
-      where: { MemberBadge: { id: { not: null } } },
+      where: { MemberBadge: { isNot: null } },
     });
 
     const downloadedImages = await fs.readdir(env.PICTURE_STORAGE_LOCATION_RAW);
@@ -32,7 +32,7 @@ export class MemberPicturesService {
   async linkImages() {
     const data = await this.prisma.member.findMany({
       include: { MemberBadge: true },
-      where: { MemberBadge: { id: { not: null } } },
+      where: { MemberBadge: { isNot: null } },
     });
 
     const withImagesReq = data.map(async (e) => {

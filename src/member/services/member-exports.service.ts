@@ -15,7 +15,7 @@ export class MemberExportsService {
         ieeeAccount: true,
         MemberBadge: true,
       },
-      where: { MemberBadge: { id: { not: null } } },
+      where: { MemberBadge: { isNot: null } },
     });
 
     //  imageFile: { not: null }
@@ -24,7 +24,7 @@ export class MemberExportsService {
       ieeeId: e.ieeeAccount ? e.ieeeAccount.id : null,
       fullName: e.fullName,
       // TODO
-      imageFile: e.MemberBadge.imageDriveId,
+      imageFile: 'todo',
       qrCode: `${e.id}.png`,
     }));
 
@@ -36,7 +36,7 @@ export class MemberExportsService {
   async genqQrs() {
     const c = await this.prisma.member.findMany({
       select: { id: true },
-      where: { MemberBadge: { id: { not: null } } },
+      where: { MemberBadge: { isNot: null } },
     });
 
     const codesReq = c.map(async (e) => ({
