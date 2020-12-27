@@ -44,7 +44,11 @@ export class RawCardInfo implements IRawCardInfo {
     return {
       where: { id },
       data: {
-        imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+        MemberBadge: {
+          create: {
+            imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+          },
+        },
         ieeeAccount: account
           ? {
               create: account,
@@ -61,7 +65,11 @@ export class RawCardInfo implements IRawCardInfo {
         fullName: nameTransformer(this.fullName),
         email: this.personalMail,
         phone: Number(this.phone),
-        imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+        MemberBadge: {
+          create: {
+            imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+          },
+        },
         ieeeAccount: account
           ? {
               create: account,

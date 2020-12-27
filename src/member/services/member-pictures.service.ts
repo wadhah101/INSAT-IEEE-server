@@ -15,15 +15,15 @@ export class MemberPicturesService {
 
   async downloadImage() {
     const all = await this.prisma.member.findMany({
-      select: { imageDriveId: true },
-      where: { imageDriveId: { not: null } },
+      select: { MemberBadge: true },
+      where: { MemberBadge: { id: { not: null } } },
     });
 
     const downloadedImages = await fs.readdir(env.PICTURE_STORAGE_LOCATION_RAW);
 
     // get non downloaded ids
     const ids = all
-      .map((e) => e.imageDriveId)
+      .map((e) => e.MemberBadge.imageDriveId)
       .filter((e) => !downloadedImages.find((el) => el === e));
     if (ids.length) await this.googleDriveService.downloadFilesFromIds(ids);
     return this.linkImages();
@@ -31,13 +31,18 @@ export class MemberPicturesService {
 
   async linkImages() {
     const data = await this.prisma.member.findMany({
-      where: { imageDriveId: { not: null }, imageFile: { equals: null } },
+      include: { MemberBadge: true },
+      where: { MemberBadge: { id: { not: null } } },
     });
 
     const withImagesReq = data.map(async (e) => {
-      const oldPath = join(env.PICTURE_STORAGE_LOCATION_RAW, e.imageDriveId);
+      const oldPath = join(
+        env.PICTURE_STORAGE_LOCATION_RAW,
+        e.MemberBadge.imageDriveId,
+      );
       const c = await fileType.fromFile(oldPath);
 
+      // TODO add sharp
       const newName = `${e.fullName} ${e.id}.${c.ext}`;
       const newPath = join(env.PICTURE_STORAGE_LOCATION, newName);
 
@@ -46,12 +51,6 @@ export class MemberPicturesService {
       return { ...e, imageFile: newName };
     });
 
-    const withImages = await Promise.all(withImagesReq);
-
-    const updates = withImages.map((e) =>
-      this.prisma.member.update({ where: { id: e.id }, data: e }),
-    );
-
-    return this.prisma.$transaction(updates);
+    return Promise.all(withImagesReq);
   }
 }

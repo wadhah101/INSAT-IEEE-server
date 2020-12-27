@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -18,6 +18,8 @@ model Member {
   id           String       @id @default(cuid())
   fullName     String
   gender       Gender?
+  imageDriveId String?      @unique
+  imageFile    String?      @unique
   fbLink       String?
   phone        Int?         @unique
   email        String?      @unique
@@ -31,7 +33,7 @@ model Member {
 }
 
 model MemberBadge {
-  id           Int  @id @default(autoincrement())
+  id           String  @id @default(cuid())
   imageDriveId String? @unique
   member       Member  @relation(fields: [memberId], references: [id])
   memberId     String

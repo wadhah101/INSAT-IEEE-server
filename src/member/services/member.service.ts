@@ -9,7 +9,9 @@ export class MemberService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(): Promise<Member[]> {
-    return this.prisma.member.findMany({ include: { ieeeAccount: true } });
+    return this.prisma.member.findMany({
+      include: { ieeeAccount: true, chapters: true },
+    });
   }
 
   // takes data from inscription form csv and inserts it into database

@@ -1,0 +1,15 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "DeleteField",
+      "model": "Member",
+      "field": "imageFile"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Member",
+      "field": "imageDriveId"
+    }
+  ]
+}

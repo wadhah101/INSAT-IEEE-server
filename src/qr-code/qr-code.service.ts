@@ -61,7 +61,6 @@ export class QrCodeService {
   }
 }
 
-// TODO
 function accountExpired(memeber: Member & { ieeeAccount: IEEEAccount }) {
   const Difference_In_Time =
     new Date().getTime() - memeber.ieeeAccount.expirationDate.getTime();

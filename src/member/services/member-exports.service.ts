@@ -9,14 +9,22 @@ export class MemberExportsService {
 
   async exportToAnisCsv() {
     const raw = await this.prisma.member.findMany({
-      select: { id: true, fullName: true, imageFile: true, ieeeAccount: true },
-      where: { imageFile: { not: null } },
+      select: {
+        id: true,
+        fullName: true,
+        ieeeAccount: true,
+        MemberBadge: true,
+      },
+      where: { MemberBadge: { id: { not: null } } },
     });
+
+    //  imageFile: { not: null }
 
     const data = raw.map((e) => ({
       ieeeId: e.ieeeAccount ? e.ieeeAccount.id : null,
       fullName: e.fullName,
-      imageFile: e.imageFile,
+      // TODO
+      imageFile: e.MemberBadge.imageDriveId,
       qrCode: `${e.id}.png`,
     }));
 
@@ -28,7 +36,7 @@ export class MemberExportsService {
   async genqQrs() {
     const c = await this.prisma.member.findMany({
       select: { id: true },
-      where: { imageFile: { not: null } },
+      where: { MemberBadge: { id: { not: null } } },
     });
 
     const codesReq = c.map(async (e) => ({
