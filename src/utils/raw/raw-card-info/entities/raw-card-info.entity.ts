@@ -33,7 +33,7 @@ export class RawCardInfo implements IRawCardInfo {
   accountActivation: string;
   picture: string;
 
-  static clone(e: IRawCardInfo) {
+  static clone(e: IRawCardInfo): RawCardInfo {
     return Object.assign(new RawCardInfo(), e);
   }
 

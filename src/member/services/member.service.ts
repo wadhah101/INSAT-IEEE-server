@@ -14,6 +14,9 @@ export class MemberService {
     });
   }
 
+  /**
+   * @deprecated
+   */
   // takes data from inscription form csv and inserts it into database
   async seedFromInscriptionForm(data: RawInscriptionInfo[]) {
     // only leave unique inputs
@@ -36,8 +39,11 @@ export class MemberService {
     return this.prisma.$transaction(req);
   }
 
+  /**
+   * @deprecated
+   */
   // takes data from cardForm csv and either links it with old member or creates new member
-  async seedFromCardForm(data: RawCardInfo[]) {
+  async seedFromCardFormV1(data: RawCardInfo[]) {
     const res = await this.prisma.member.findMany();
 
     // classify members into two group ,  based on inscription form user record existance

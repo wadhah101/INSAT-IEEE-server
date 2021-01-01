@@ -75,6 +75,6 @@ export class MemberController {
       file.buffer.toString(),
     );
 
-    return this.memberService.seedFromCardForm(data);
+    return this.memberService.seedFromCardFormV1(data);
   }
 }

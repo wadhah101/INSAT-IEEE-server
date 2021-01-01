@@ -9,18 +9,17 @@ import * as Papa from 'papaparse';
 @Injectable()
 export class RawCardInfoService {
   async CardFormSetup(data: string) {
-    // csv parsing
     const CardInfoReq = Papa.parse<IRawCardInfo>(data, {
       header: true,
       skipEmptyLines: true,
       transformHeader: (_, ind) => RawCardInfo.headerTransformer(ind),
       transform: (value) => value.trim(),
-    }).data.map(async (e) => {
-      await RawCardInfo.schema.validate(e);
+    }).data.map((e) => {
+      RawCardInfo.schema.validateSync(e);
       return RawCardInfo.clone(e);
     });
 
-    return Promise.all(CardInfoReq);
+    return CardInfoReq;
   }
 
   InscriptionFormSetup(data: string) {
