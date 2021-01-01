@@ -12,14 +12,14 @@ import {
 import { MemberService } from '../services/member.service';
 import { LocalGuard } from 'src/guards/local-guard/local.guard';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
-import { RawCardInfoService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
+import { FormParserService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
 
 @Controller('member')
 @UseGuards(LocalGuard)
 export class MemberController {
   constructor(
     private readonly memberService: MemberService,
-    private readonly rawCardInfoService: RawCardInfoService,
+    private readonly rawCardInfoService: FormParserService,
   ) {}
 
   @SetMetadata('NODE_ENV', 'development')
@@ -46,7 +46,7 @@ export class MemberController {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
 
-    const data = this.rawCardInfoService.InscriptionFormSetup(
+    const data = this.rawCardInfoService.InscriptionFormRawParser(
       file.buffer.toString(),
     );
 
@@ -71,7 +71,7 @@ export class MemberController {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
 
-    const data = await this.rawCardInfoService.CardFormSetup(
+    const data = await this.rawCardInfoService.CardFormV1RawParser(
       file.buffer.toString(),
     );
 

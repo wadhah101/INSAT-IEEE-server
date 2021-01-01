@@ -1,32 +1,34 @@
-import { IRawCardInfo, RawCardInfo } from './entities/raw-card-info.entity';
+import { ICardFormV1Raw, CardFormV1Raw } from './entities/raw-card-info.entity';
 import {
-  IRawInscriptionInfo,
-  RawInscriptionInfo,
+  IInscriptionFormRaw,
+  InscriptionFormRaw,
 } from './entities/raw-inscription-info.entity';
 import { Injectable } from '@nestjs/common';
 import * as Papa from 'papaparse';
 
 @Injectable()
-export class RawCardInfoService {
-  async CardFormSetup(data: string) {
-    const CardInfoReq = Papa.parse<IRawCardInfo>(data, {
+export class FormParserService {
+
+  
+  async CardFormV1RawParser(data: string) {
+    const CardInfoReq = Papa.parse<ICardFormV1Raw>(data, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (_, ind) => RawCardInfo.headerTransformer(ind),
+      transformHeader: (_, ind) => CardFormV1Raw.headerTransformer(ind),
       transform: (value) => value.trim(),
     }).data.map((e) => {
-      RawCardInfo.schema.validateSync(e);
-      return RawCardInfo.clone(e);
+      CardFormV1Raw.schema.validateSync(e);
+      return CardFormV1Raw.clone(e);
     });
 
     return CardInfoReq;
   }
 
-  InscriptionFormSetup(data: string) {
-    return Papa.parse<IRawInscriptionInfo>(data, {
+  InscriptionFormRawParser(data: string) {
+    return Papa.parse<IInscriptionFormRaw>(data, {
       header: true,
-      transformHeader: (_, ind) => RawInscriptionInfo.headerTransformer(ind),
-      transform: (e, field) => RawInscriptionInfo.transformer(e.trim(), field),
-    }).data.map((e) => RawInscriptionInfo.clone(e));
+      transformHeader: (_, ind) => InscriptionFormRaw.headerTransformer(ind),
+      transform: (e, field) => InscriptionFormRaw.transformer(e.trim(), field),
+    }).data.map((e) => InscriptionFormRaw.clone(e));
   }
 }

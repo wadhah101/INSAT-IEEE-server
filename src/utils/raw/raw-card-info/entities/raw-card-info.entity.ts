@@ -12,7 +12,7 @@ export const nameTransformer = (value: string) =>
     .join(' ')
     .trim();
 
-export interface IRawCardInfo {
+export interface ICardFormV1Raw {
   timestamp: string;
   fullName: string;
   ieeeMail: string;
@@ -23,7 +23,7 @@ export interface IRawCardInfo {
   picture: string;
 }
 
-export class RawCardInfo implements IRawCardInfo {
+export class CardFormV1Raw implements ICardFormV1Raw {
   timestamp: string;
   fullName: string;
   ieeeMail: string;
@@ -33,8 +33,8 @@ export class RawCardInfo implements IRawCardInfo {
   accountActivation: string;
   picture: string;
 
-  static clone(e: IRawCardInfo): RawCardInfo {
-    return Object.assign(new RawCardInfo(), e);
+  static clone(e: ICardFormV1Raw): CardFormV1Raw {
+    return Object.assign(new CardFormV1Raw(), e);
   }
 
   static imageDrivePattern = /id=(.*)/;
@@ -48,7 +48,9 @@ export class RawCardInfo implements IRawCardInfo {
           create: {
             // TODO
             wave: 1,
-            imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+            imageDriveId: this.picture.match(
+              CardFormV1Raw.imageDrivePattern,
+            )[1],
           },
         },
         ieeeAccount: account
@@ -71,7 +73,9 @@ export class RawCardInfo implements IRawCardInfo {
           create: {
             // TODO
             wave: 1,
-            imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
+            imageDriveId: this.picture.match(
+              CardFormV1Raw.imageDrivePattern,
+            )[1],
           },
         },
         ieeeAccount: account
@@ -83,7 +87,7 @@ export class RawCardInfo implements IRawCardInfo {
     };
   }
 
-  static schema = yup.object().shape<IRawCardInfo>({
+  static schema = yup.object().shape<ICardFormV1Raw>({
     timestamp: null,
     fullName: yup.string().required(),
     ieeeMail: yup.string().matches(/.+@ieee\.org|/),

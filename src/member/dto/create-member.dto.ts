@@ -1,9 +1,9 @@
-import { RawCardInfo } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
+import { CardFormV1Raw } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
 
 export class CreateMemberDto {}
 
 // ieee acount factory
-export const ieeeAccountFactory = (e: RawCardInfo) =>
+export const ieeeAccountFactory = (e: CardFormV1Raw) =>
   e.ieeeId
     ? {
         id: Number(e.ieeeId),

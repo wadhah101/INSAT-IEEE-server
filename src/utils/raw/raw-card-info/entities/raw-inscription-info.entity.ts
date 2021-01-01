@@ -3,7 +3,7 @@ import { nameTransformer } from './raw-card-info.entity';
 
 const chaptersPattern = /(PES)|(RAS)|(IAS)|(EMBS)|(CS)|(WIE)/g;
 
-export interface IRawInscriptionInfo {
+export interface IInscriptionFormRaw {
   timestamp: string;
   firstName: string;
   lastName: string;
@@ -17,7 +17,7 @@ export interface IRawInscriptionInfo {
   description: string;
 }
 
-export class RawInscriptionInfo {
+export class InscriptionFormRaw {
   timestamp: string;
   firstName: string;
   lastName: string;
@@ -30,8 +30,8 @@ export class RawInscriptionInfo {
   chapters: string[];
   description: string;
 
-  static clone(e: IRawInscriptionInfo): RawInscriptionInfo {
-    return Object.assign(new RawInscriptionInfo(), e);
+  static clone(e: IInscriptionFormRaw): InscriptionFormRaw {
+    return Object.assign(new InscriptionFormRaw(), e);
   }
 
   static cursedFacebookLinks = [
@@ -67,7 +67,7 @@ export class RawInscriptionInfo {
       case 'chapters':
         return value.match(chaptersPattern);
       case 'fbLink':
-        return RawInscriptionInfo.cursedFacebookLinks.find((e) => e === value)
+        return InscriptionFormRaw.cursedFacebookLinks.find((e) => e === value)
           ? null
           : value;
       default:

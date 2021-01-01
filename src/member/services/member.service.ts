@@ -1,8 +1,8 @@
-import { RawCardInfo } from '../../utils/raw/raw-card-info/entities/raw-card-info.entity';
+import { CardFormV1Raw } from '../../utils/raw/raw-card-info/entities/raw-card-info.entity';
 import { Injectable } from '@nestjs/common';
 import { Member } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RawInscriptionInfo } from 'src/utils/raw/raw-card-info/entities/raw-inscription-info.entity';
+import { InscriptionFormRaw } from 'src/utils/raw/raw-card-info/entities/raw-inscription-info.entity';
 
 @Injectable()
 export class MemberService {
@@ -18,7 +18,7 @@ export class MemberService {
    * @deprecated
    */
   // takes data from inscription form csv and inserts it into database
-  async seedFromInscriptionForm(data: RawInscriptionInfo[]) {
+  async seedFromInscriptionForm(data: InscriptionFormRaw[]) {
     // only leave unique inputs
     const raw = data
       .map((e) => e.toMember())
@@ -43,12 +43,12 @@ export class MemberService {
    * @deprecated
    */
   // takes data from cardForm csv and either links it with old member or creates new member
-  async seedFromCardFormV1(data: RawCardInfo[]) {
+  async seedFromCardFormV1(data: CardFormV1Raw[]) {
     const res = await this.prisma.member.findMany();
 
     // classify members into two group ,  based on inscription form user record existance
     const [inprev, nonInPrev] = data.reduce<
-      [{ inscription: Member; card: RawCardInfo }[], RawCardInfo[]]
+      [{ inscription: Member; card: CardFormV1Raw }[], CardFormV1Raw[]]
     >(
       (acc, cur) => {
         const isInPrev = res.find(
