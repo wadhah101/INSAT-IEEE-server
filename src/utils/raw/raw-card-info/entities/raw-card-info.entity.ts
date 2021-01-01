@@ -46,6 +46,8 @@ export class RawCardInfo implements IRawCardInfo {
       data: {
         MemberBadge: {
           create: {
+            // TODO
+            wave: 1,
             imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
           },
         },
@@ -67,6 +69,8 @@ export class RawCardInfo implements IRawCardInfo {
         phone: Number(this.phone),
         MemberBadge: {
           create: {
+            // TODO
+            wave: 1,
             imageDriveId: this.picture.match(RawCardInfo.imageDrivePattern)[1],
           },
         },
