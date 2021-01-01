@@ -2,17 +2,11 @@ import { GoogleDriveService } from './google-drive.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MemberService } from '../../member/services/member.service';
 import { Module } from '@nestjs/common';
-import { FormParserModule } from 'src/utils/raw/raw-card-info/raw-card-info.module';
-import { FormParserService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
+import { FormParserModule } from 'src/utils/raw/FormParser/FormParser.module';
 
 @Module({
   imports: [FormParserModule],
-  providers: [
-    PrismaService,
-    GoogleDriveService,
-    MemberService,
-    FormParserService,
-  ],
+  providers: [PrismaService, GoogleDriveService, MemberService],
   exports: [GoogleDriveService],
 })
 export class GoogleDriveModule {}

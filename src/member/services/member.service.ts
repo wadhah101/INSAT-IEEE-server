@@ -1,8 +1,8 @@
-import { CardFormV1Raw } from '../../utils/raw/raw-card-info/entities/raw-card-info.entity';
+import { CardFormV1Raw } from '../../utils/raw/FormParser/entities/CardFormV1Raw.entity';
 import { Injectable } from '@nestjs/common';
 import { Member } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { InscriptionFormRaw } from 'src/utils/raw/raw-card-info/entities/raw-inscription-info.entity';
+import { InscriptionFormRaw } from 'src/utils/raw/FormParser/entities/InscriptionFormRaw.entity';
 
 @Injectable()
 export class MemberService {

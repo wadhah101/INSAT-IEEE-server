@@ -1,4 +1,4 @@
-import { CardFormV1Raw } from 'src/utils/raw/raw-card-info/entities/raw-card-info.entity';
+import { CardFormV1Raw } from 'src/utils/raw/FormParser/entities/CardFormV1Raw.entity';
 
 export class CreateMemberDto {}
 

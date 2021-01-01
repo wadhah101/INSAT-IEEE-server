@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { MemberService } from './services/member.service';
 import { MemberController } from './controllers/member.controller';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FormParserModule } from 'src/utils/raw/raw-card-info/raw-card-info.module';
+import { FormParserModule } from 'src/utils/raw/FormParser/FormParser.module';
 import { MemberPicturesService } from './services/member-pictures.service';
 import { MemberExportsService } from './services/member-exports.service';
 import { MemberExportsController } from './controllers/member-exports.controller';

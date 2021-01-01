@@ -1,6 +1,6 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Module } from '@nestjs/common';
-import { FormParserService } from './raw-card-info.service';
+import { FormParserService } from './FormParser.service';
 
 @Module({
   providers: [FormParserService, PrismaService],

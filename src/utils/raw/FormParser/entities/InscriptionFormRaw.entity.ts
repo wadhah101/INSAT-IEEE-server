@@ -1,5 +1,5 @@
 import { Gender, Prisma } from '@prisma/client';
-import { nameTransformer } from './raw-card-info.entity';
+import { nameTransformer } from './CardFormV1Raw.entity';
 
 const chaptersPattern = /(PES)|(RAS)|(IAS)|(EMBS)|(CS)|(WIE)/g;
 

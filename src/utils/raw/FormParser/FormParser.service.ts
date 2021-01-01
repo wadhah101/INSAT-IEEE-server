@@ -1,8 +1,8 @@
-import { ICardFormV1Raw, CardFormV1Raw } from './entities/raw-card-info.entity';
+import { ICardFormV1Raw, CardFormV1Raw } from './entities/CardFormV1Raw.entity';
 import {
   IInscriptionFormRaw,
   InscriptionFormRaw,
-} from './entities/raw-inscription-info.entity';
+} from './entities/InscriptionFormRaw.entity';
 import { Injectable } from '@nestjs/common';
 import * as Papa from 'papaparse';
 

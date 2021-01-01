@@ -12,7 +12,7 @@ import {
 import { MemberService } from '../services/member.service';
 import { LocalGuard } from 'src/guards/local-guard/local.guard';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
-import { FormParserService } from 'src/utils/raw/raw-card-info/raw-card-info.service';
+import { FormParserService } from 'src/utils/raw/FormParser/FormParser.service';
 
 @Controller('member')
 @UseGuards(LocalGuard)
