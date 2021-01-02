@@ -6,7 +6,7 @@ import { env } from 'process';
 
 @Injectable()
 export class GoogleDriveService {
-  async downloadFilesFromIds(ids: string[]) {
+  async downloadFilesFromIds(ids: string[]): Promise<string[]> {
     const auth = await fullAuth();
     console.log('meta download Started');
     const idsReq = ids.map((e) => downloadFile(auth, e));

@@ -5,6 +5,7 @@ import * as fileType from 'file-type';
 import { join } from 'path';
 import { env } from 'process';
 import { promises as fs } from 'fs';
+import _ from 'lodash';
 
 @Injectable()
 export class MemberPicturesService {
@@ -13,20 +14,25 @@ export class MemberPicturesService {
     private readonly googleDriveService: GoogleDriveService,
   ) {}
 
-  async downloadImage() {
+  // TODO add params : wave / exported
+  async downloadImage(): Promise<string[]> {
     const all = await this.prisma.member.findMany({
       select: { MemberBadge: true },
       where: { MemberBadge: { isNot: null } },
     });
 
+    // search download directory for already downloaded image files
     const downloadedImages = await fs.readdir(env.PICTURE_STORAGE_LOCATION_RAW);
 
-    // get non downloaded ids
-    const ids = all
-      .map((e) => e.MemberBadge.imageDriveId)
-      .filter((e) => !downloadedImages.find((el) => el === e));
-    if (ids.length) await this.googleDriveService.downloadFilesFromIds(ids);
-    return this.linkImages();
+    // only download needed picture
+    const nonDownloadedImages = _.difference(
+      all.map((e) => e.MemberBadge.imageDriveId),
+      downloadedImages,
+    );
+
+    return nonDownloadedImages.length
+      ? this.googleDriveService.downloadFilesFromIds(nonDownloadedImages)
+      : [];
   }
 
   async linkImages() {
@@ -40,15 +46,11 @@ export class MemberPicturesService {
         env.PICTURE_STORAGE_LOCATION_RAW,
         e.MemberBadge.imageDriveId,
       );
-      const c = await fileType.fromFile(oldPath);
+      const file = await fs.readFile(oldPath);
+      const c = await fileType.fromBuffer(file);
 
-      // TODO add sharp
       const newName = `${e.fullName} ${e.id}.${c.ext}`;
-      const newPath = join(env.PICTURE_STORAGE_LOCATION, newName);
-
-      await fs.copyFile(oldPath, newPath);
-
-      return { ...e, imageFile: newName };
+      return { name: newName, file };
     });
 
     return Promise.all(withImagesReq);
