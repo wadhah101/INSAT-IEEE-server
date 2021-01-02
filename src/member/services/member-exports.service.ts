@@ -17,9 +17,11 @@ export class MemberExportsService {
       },
       where: { MemberBadge: { isNot: null } },
     });
+
     const data = raw.map((e) => ({
       ieeeId: e.ieeeAccount ? e.ieeeAccount.id : null,
       fullName: e.fullName,
+      // TODO fix file extension
       imageFile: `${e.fullName} ${e.id}.jpg`,
       qrCode: `${e.id}.png`,
     }));

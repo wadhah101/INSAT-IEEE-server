@@ -21,6 +21,7 @@ export class MemberPicturesService {
       where: { MemberBadge: { isNot: null } },
     });
 
+    // TODO add directory existance check
     // search download directory for already downloaded image files
     const downloadedImages = await fs.readdir(env.PICTURE_STORAGE_LOCATION_RAW);
 
@@ -29,6 +30,8 @@ export class MemberPicturesService {
       all.map((e) => e.MemberBadge.imageDriveId),
       downloadedImages,
     );
+
+    console.log('downloading', nonDownloadedImages);
 
     return nonDownloadedImages.length
       ? this.googleDriveService.downloadFilesFromIds(nonDownloadedImages)

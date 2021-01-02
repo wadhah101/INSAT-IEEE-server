@@ -3,6 +3,8 @@ import { google } from 'googleapis';
 import * as fs from 'fs';
 import * as readline from 'readline';
 
+// TODO complete rewrite for token expiration and full async system
+
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
 
@@ -32,6 +34,7 @@ export async function asyncAuthorize(credentials) {
   );
 
   // todo catch with ayncGetAccessToken
+  // TODO check token expiration date
   const token = await fs.promises.readFile(TOKEN_PATH).catch(() => {
     getAccessToken(oAuth2Client, () => '');
   });
@@ -41,6 +44,7 @@ export async function asyncAuthorize(credentials) {
   return oAuth2Client;
 }
 
+// TODO async rewrite
 function getAccessToken(oAuth2Client, callback) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
@@ -87,7 +91,10 @@ export async function fullAuth() {
     .readFile('credentials.json')
     .catch((e) => console.log('Error loading client secret file:', e));
   if (!credentielsRaw) return;
+
+  console.log('djdjdjdjdj');
   const credentiels = JSON.parse(credentielsRaw.toString());
+  await asyncAuthorize(credentiels);
   const authToken = await asyncAuthorize(credentiels);
   return authToken;
 }
