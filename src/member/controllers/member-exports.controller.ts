@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { LocalGuard } from 'src/guards/local-guard/local.guard';
-import * as AdmZip from 'adm-zip';
+import AdmZip from 'adm-zip';
 import { Response } from 'express';
 
 @Controller('member/exports')
@@ -24,22 +24,14 @@ export class MemberExportsController {
   @Header('X-Suggested-Filename', 'MembersQrCodes.zip')
   async genqQrs(@Res() res: Response) {
     const zip = new AdmZip();
-    const result = await this.memberExportsService.genqQrs();
-
+    const [result, photoshopCSV] = await Promise.all([
+      this.memberExportsService.genqQrs(),
+      this.memberExportsService.exportToPhotoshopCSV(),
+    ]);
     result.forEach((e) => {
-      zip.addFile(e.name, e.buffer);
+      zip.addFile(`QR-codes/${e.name}`, e.buffer);
     });
-
-    const out = bufferToStream(zip.toBuffer());
-    out.pipe(res);
-  }
-
-  @SetMetadata('NODE_ENV', 'development')
-  @Get('photoshopCSV')
-  @Header('Content-Disposition', 'attachment; filename=data.csv')
-  @Header('X-Suggested-Filename', 'data.csv')
-  @Header('Content-Type', 'text/csv')
-  async photoshopCSV() {
-    return this.memberExportsService.exportToPhotoshopCSV();
+    zip.addFile('data.csv', Buffer.from(photoshopCSV, 'utf-8'));
+    res.end(zip.toBuffer());
   }
 }

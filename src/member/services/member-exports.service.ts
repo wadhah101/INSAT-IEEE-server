@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as Papa from 'papaparse';
-import * as qr from 'qrcode';
+import Papa from 'papaparse';
+import qr from 'qrcode';
 
 @Injectable()
 export class MemberExportsService {
   constructor(private prisma: PrismaService) {}
 
-  async exportToPhotoshopCSV() {
+  async exportToPhotoshopCSV(): Promise<string> {
     const raw = await this.prisma.member.findMany({
       select: {
         id: true,

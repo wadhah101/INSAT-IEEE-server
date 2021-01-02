@@ -80,7 +80,7 @@ export async function downloadFiles(auth, fileId: string) {
       throw new HttpException(e, HttpStatus.UNPROCESSABLE_ENTITY);
     });
 
-  return downloadReq.then(async (e) => ({ fileId, data: await e.data }));
+  return downloadReq.then(async (e) => ({ fileId, data: e.data }));
 }
 
 async function listFiles(auth) {

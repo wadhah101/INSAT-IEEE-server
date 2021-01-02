@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -26,6 +26,7 @@ model Member {
   ieeeAccount IEEEAccount?
   chapters    Chapter[]
   qrScans     QrScan[]
+  // badge MemberBadge
   MemberBadge MemberBadge?
 }
 
