@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { downloadFiles, fullAuth } from './getToken';
+import { downloadFile, fullAuth } from './getToken';
 import * as fs from 'fs';
 import { join } from 'path';
 import { env } from 'process';
@@ -9,7 +9,7 @@ export class GoogleDriveService {
   async downloadFilesFromIds(ids: string[]) {
     const auth = await fullAuth();
     console.log('meta download Started');
-    const idsReq = ids.map((e) => downloadFiles(auth, e));
+    const idsReq = ids.map((e) => downloadFile(auth, e));
     const res = await Promise.all(idsReq);
     let counter = 0;
     const work = res.map((e) => {

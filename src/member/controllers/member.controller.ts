@@ -115,7 +115,5 @@ export class MemberController {
     });
 
     return t.data;
-
-    return t.data.find((e) => e['ieeeID'] === '97226109');
   }
 }
