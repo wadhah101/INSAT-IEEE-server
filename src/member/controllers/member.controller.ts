@@ -14,9 +14,9 @@ import { MemberService } from '../services/member.service';
 import { LocalGuard } from 'src/guards/local-guard/local.guard';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
 import { FormParserService } from 'src/utils/raw/FormParser/FormParser.service';
-import _, { CondPair } from 'lodash';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import Papa from 'papaparse';
+import { IEEEAnlyticsElement } from 'src/utils/entities/IEEEAnlytics.entity';
+import { AmiraSheetElement } from 'src/utils/entities/AmiraSheet.entity';
 
 @Controller('member')
 @UseGuards(LocalGuard)
@@ -103,24 +103,14 @@ export class MemberController {
 
     // if not found in old data create new account and fill info from analytics  and amira sheet
 
-    const mapFunctionGen = (
-      indexIn: number,
-      name: string,
-    ): CondPair<number, string> => [(e) => e === indexIn, () => name];
-    const mapFunction = _.cond<number, string>([
-      mapFunctionGen(3, 'ieeeID'),
-      mapFunctionGen(14, 'year'),
-      mapFunctionGen(9, 'email'),
-      [() => true, () => undefined],
-    ]);
-    const t = Papa.parse(files.analytics[0].buffer.toString().trim(), {
-      header: true,
-      transformHeader: (header, index) => {
-        // console.log(header, index);
-        return mapFunction(index);
-      },
-    });
+    // functions to transform  string to amirasheet / formcsv / analytics array
 
-    return t.data;
+    // map every  element in the form csv to { old , amiraSheet , analyitcs  }
+
+    const ieeeAnalytics = IEEEAnlyticsElement.fromCSV(
+      files.analytics[0].buffer.toString(),
+    );
+
+    return { ieeeAnalytics };
   }
 }
