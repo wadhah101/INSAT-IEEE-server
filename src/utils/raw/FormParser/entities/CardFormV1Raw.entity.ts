@@ -3,6 +3,8 @@ import { ieeeAccountFactory } from 'src/member/dto/create-member.dto';
 import * as yup from 'yup'; // for everything
 
 const namePattern = /(\S*)\s*/g;
+
+// can be replaced with lodash star case
 export const nameTransformer = (value: string) =>
   Array.from(value.matchAll(namePattern))
     .map((e) => e[1])

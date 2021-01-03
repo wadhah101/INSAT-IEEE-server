@@ -17,6 +17,7 @@ import { FormParserService } from 'src/utils/raw/FormParser/FormParser.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { IEEEAnlyticsElement } from 'src/utils/entities/IEEEAnlytics.entity';
 import { AmiraSheetElement } from 'src/utils/entities/AmiraSheet.entity';
+import { CardFormV2Raw } from 'src/utils/raw/FormParser/entities/CardFormV2Raw.entity';
 
 @Controller('member')
 @UseGuards(LocalGuard)
@@ -111,6 +112,18 @@ export class MemberController {
       files.analytics[0].buffer.toString(),
     );
 
-    return { ieeeAnalytics };
+    const form = CardFormV2Raw.fromCSV(files.form[0].buffer.toString());
+
+    const matchy = form.map((e) => {
+      const t = {
+        form: e,
+        analytics: ieeeAnalytics.find(({ ieeeID }) => ieeeID === e.ieeeID),
+        amiraSheet: null,
+      };
+      if (!t.analytics) console.error('not found in anaylitcs ', t);
+      return t;
+    });
+
+    return { matchy };
   }
 }
