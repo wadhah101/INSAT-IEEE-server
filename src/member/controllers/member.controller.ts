@@ -1,3 +1,4 @@
+import { PrismaService } from './../../prisma/prisma.service';
 import {
   Controller,
   Get,
@@ -16,8 +17,11 @@ import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/fi
 import { FormParserService } from 'src/utils/raw/FormParser/FormParser.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { IEEEAnlyticsElement } from 'src/utils/entities/IEEEAnlytics.entity';
-import { AmiraSheetElement } from 'src/utils/entities/AmiraSheet.entity';
 import { CardFormV2Raw } from 'src/utils/raw/FormParser/entities/CardFormV2Raw.entity';
+import _ from 'lodash';
+import { Prisma } from '@prisma/client';
+import { phone } from 'faker';
+import { AmiraSheetElement } from 'src/utils/entities/AmiraSheet.entity';
 
 @Controller('member')
 @UseGuards(LocalGuard)
@@ -25,6 +29,7 @@ export class MemberController {
   constructor(
     private readonly memberService: MemberService,
     private readonly rawCardInfoService: FormParserService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @SetMetadata('NODE_ENV', 'development')
@@ -90,40 +95,71 @@ export class MemberController {
   )
   async meh(
     @UploadedFiles()
-    files: {
-      form: Express.Multer.File[];
-      analytics: Express.Multer.File[];
-      amiraSheet: Express.Multer.File[];
+    {
+      formFile,
+      analyticsFile,
+      amiraSheetFile,
+    }: {
+      formFile: Express.Multer.File[];
+      analyticsFile: Express.Multer.File[];
+      amiraSheetFile: Express.Multer.File[];
     },
   ) {
-    // WORKFLOW
-    // get element from form
-    // search old data
-    // search analytics
-    // search amiraSheet
-
-    // if not found in old data create new account and fill info from analytics  and amira sheet
-
-    // functions to transform  string to amirasheet / formcsv / analytics array
-
-    // map every  element in the form csv to { old , amiraSheet , analyitcs  }
-
-    const ieeeAnalytics = IEEEAnlyticsElement.fromCSV(
-      files.analytics[0].buffer.toString(),
+    const ieeeAnalyticsReq = IEEEAnlyticsElement.parser.fromCSV(
+      analyticsFile[0].buffer.toString(),
     );
 
-    const form = CardFormV2Raw.fromCSV(files.form[0].buffer.toString());
+    const amiraReq = AmiraSheetElement.parser.fromCSV(
+      amiraSheetFile[0].buffer.toString(),
+    );
 
-    const matchy = form.map((e) => {
-      const t = {
-        form: e,
-        analytics: ieeeAnalytics.find(({ ieeeID }) => ieeeID === e.ieeeID),
-        amiraSheet: null,
+    const formReq = CardFormV2Raw.parser.fromCSV(formFile[0].buffer.toString());
+
+    const allReq = this.prisma.member.findMany();
+
+    const [amira, ieeeAnalytics, form, all] = await Promise.all([
+      amiraReq,
+      ieeeAnalyticsReq,
+      formReq,
+      allReq,
+    ]);
+
+    const matchyMatchy = form.map((e) => ({
+      old: all.find(
+        ({ phone, email }) =>
+          phone === e.phoneNumber ||
+          email.toLowerCase() === e.personalEmail.toLowerCase(),
+      ),
+      form: e,
+      analytics: ieeeAnalytics.find(({ ieeeID }) => ieeeID === e.ieeeID),
+      amira: amira.find(({ ieeeID }) => ieeeID === e.ieeeID),
+    }));
+
+    const [inOldForm, notInOldForm] = _.partition(matchyMatchy, (e) => e.old);
+
+    const newInserts = notInOldForm.map((e) => {
+      const ieeeMail = '';
+      const c: Prisma.MemberCreateArgs = {
+        data: {
+          fullName: e.form.fullName,
+          email: e.form.personalEmail,
+          phone: e.form.phoneNumber,
+          fbLink: e.amira?.fbLink,
+          studyField: e.amira?.studyField,
+          studyLevel: e.amira?.studyLevel,
+          gender: e.amira?.gender || e.analytics?.gender,
+          ieeeAccount: {
+            create: {
+              id: e.form.ieeeID,
+              expirationDate: new Date(e.analytics.year + 1, 3, 1),
+              email: ieeeMail,
+            },
+          },
+        },
       };
-      if (!t.analytics) console.error('not found in anaylitcs ', t);
-      return t;
+      return c;
     });
 
-    return { matchy };
+    return { amira };
   }
 }

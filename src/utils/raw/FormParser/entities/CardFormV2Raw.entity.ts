@@ -1,3 +1,4 @@
+import { ParsebleCSV } from './../../../entities/parseble.abstract';
 import { plainToClass } from 'class-transformer';
 import {
   IsDate,
@@ -30,22 +31,6 @@ export class CardFormV2Raw {
   @IsNotEmpty()
   @IsString()
   pictureID: string;
-
-  static parse(e: Record<string, any>): CardFormV2Raw {
-    const t = plainToClass(CardFormV2Raw, e, {
-      enableImplicitConversion: true,
-    });
-
-    const errors = validateSync(t, {
-      skipMissingProperties: false,
-    });
-
-    if (errors.length > 0) {
-      throw new Error(errors.toString());
-    }
-
-    return t;
-  }
 
   private static headerTransformer = _.cond<number, string>([
     ...([
@@ -80,13 +65,9 @@ export class CardFormV2Raw {
     [() => true, ({ v }) => v],
   ]);
 
-  static fromCSV(data: string): CardFormV2Raw[] {
-    const t = Papa.parse(data.trim(), {
-      header: true,
-      transformHeader: (_l, index) => CardFormV2Raw.headerTransformer(index),
-      transform: (v, f) => this.transformer({ v, f }),
-    });
-
-    return t.data.map((e) => CardFormV2Raw.parse(e));
-  }
+  static parser = new ParsebleCSV(
+    CardFormV2Raw,
+    (_header, index) => CardFormV2Raw.headerTransformer(index),
+    (v, f) => CardFormV2Raw.transformer({ v, f }),
+  );
 }

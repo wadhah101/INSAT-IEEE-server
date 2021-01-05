@@ -1,7 +1,7 @@
-import { plainToClass } from 'class-transformer';
-import { IsInt, IsEmail, validateSync, IsNotEmpty } from 'class-validator';
-import _, { CondPair } from 'lodash';
-import Papa from 'papaparse';
+import { ParsebleCSV } from './parseble.abstract';
+import { Gender } from '@prisma/client';
+import { IsInt, IsEmail, IsEnum, IsOptional } from 'class-validator';
+import _ from 'lodash';
 
 export class IEEEAnlyticsElement {
   @IsInt()
@@ -13,39 +13,34 @@ export class IEEEAnlyticsElement {
   @IsEmail()
   email: string;
 
-  static parse(e: Record<string, any>): IEEEAnlyticsElement {
-    const t = plainToClass(IEEEAnlyticsElement, e, {
-      enableImplicitConversion: true,
-    });
+  @IsOptional()
+  @IsEnum(Gender)
+  gender: Gender;
 
-    const errors = validateSync(t, {
-      skipMissingProperties: false,
-    });
+  private static transformer = _.cond<
+    { f: string | number; v: string },
+    string
+  >([
+    [
+      ({ f }) => f === 'gender',
+      ({ v }) =>
+        v === 'Unknown' ? null : v === 'Male' ? Gender.male : Gender.female,
+    ],
 
-    if (errors.length > 0) {
-      console.log(e);
-      throw new Error(errors.toString());
-    }
+    [() => true, ({ v }) => v],
+  ]);
 
-    return t;
-  }
+  private static headerParser = _.cond<number, string>([
+    [(e) => e === 3, () => 'ieeeID'],
+    [(e) => e === 14, () => 'year'],
+    [(e) => e === 9, () => 'email'],
+    [(e) => e === 12, () => 'gender'],
+    [() => true, () => ''],
+  ]);
 
-  static fromCSV(data: string): IEEEAnlyticsElement[] {
-    const mapFunctionGen = (
-      indexIn: number,
-      name: string,
-    ): CondPair<number, string> => [(e) => e === indexIn, () => name];
-    const mapFunction = _.cond<number, string>([
-      mapFunctionGen(3, 'ieeeID'),
-      mapFunctionGen(14, 'year'),
-      mapFunctionGen(9, 'email'),
-      [() => true, () => ''],
-    ]);
-    const t = Papa.parse(data.trim(), {
-      header: true,
-      transformHeader: (_, index) => mapFunction(index),
-    });
-
-    return t.data.map((e) => IEEEAnlyticsElement.parse(e));
-  }
+  static parser = new ParsebleCSV(
+    IEEEAnlyticsElement,
+    (_header, index) => IEEEAnlyticsElement.headerParser(index),
+    (v, f) => IEEEAnlyticsElement.transformer({ v, f }),
+  );
 }

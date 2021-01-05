@@ -1,39 +1,67 @@
-import { plainToClass } from 'class-transformer';
-import { validateSync } from 'class-validator';
-import _, { CondPair } from 'lodash';
-import Papa from 'papaparse';
+import { Gender } from '@prisma/client';
+import {
+  IsEmail,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
+import _ from 'lodash';
+import { ParsebleCSV } from './parseble.abstract';
 
 export class AmiraSheetElement {
-  static parse(e: Record<string, any>): AmiraSheetElement {
-    const t = plainToClass(AmiraSheetElement, e, {
-      enableImplicitConversion: true,
-    });
+  @IsNumber()
+  ieeeID: number;
 
-    const errors = validateSync(t, {
-      skipMissingProperties: false,
-    });
+  @IsNumber()
+  @IsOptional()
+  studyLevel: number;
 
-    if (errors.length > 0) {
-      throw new Error(errors.toString());
-    }
+  @IsOptional()
+  @IsUrl()
+  fbLink?: string;
 
-    return t;
-  }
+  @IsOptional()
+  @IsEmail()
+  personalEmail: string;
 
-  static fromCSV(data: string): AmiraSheetElement[] {
-    const mapFunctionGen = (
-      indexIn: number,
-      name: string,
-    ): CondPair<number, string> => [(e) => e === indexIn, () => name];
-    const mapFunction = _.cond<number, string>([
-      mapFunctionGen(3, 'ieeeID'),
-      [() => true, () => ''],
-    ]);
-    const t = Papa.parse(data.trim(), {
-      header: true,
-      transformHeader: (_, index) => mapFunction(index),
-    });
+  @IsOptional()
+  @IsString()
+  studyField: string;
 
-    return t.data.map((e) => AmiraSheetElement.parse(e));
-  }
+  @IsOptional()
+  @IsEnum(Gender)
+  gender: Gender;
+
+  private static transformer = _.cond<
+    { f: string | number; v: string },
+    string
+  >([
+    [
+      ({ f }) => f === 'gender',
+      ({ v }) => (v && v === 'Female' ? Gender.female : Gender.male),
+    ],
+    [() => true, ({ v }) => (v === '' ? null : v)],
+  ]);
+
+  private static headerTransformer = _.cond<
+    { index: number; field: string },
+    string
+  >([
+    [({ index }) => index === 16, () => 'ieeeID'],
+    [({ index }) => index === 18, () => 'gender'],
+    [({ index }) => index === 3, () => 'personalEmail'],
+    [({ index }) => index === 5, () => 'fbLink'],
+    [({ index }) => index === 6, () => 'studyField'],
+    [({ index }) => index === 7, () => 'studyLevel'],
+    [() => true, ({ field }) => field],
+  ]);
+
+  static parser = new ParsebleCSV(
+    AmiraSheetElement,
+    (header, index) =>
+      AmiraSheetElement.headerTransformer({ index, field: header }),
+    (value, field) => AmiraSheetElement.transformer({ f: field, v: value }),
+  );
 }
