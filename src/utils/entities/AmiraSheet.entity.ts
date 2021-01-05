@@ -8,7 +8,7 @@ import {
   IsUrl,
 } from 'class-validator';
 import _ from 'lodash';
-import { ParsebleCSV } from './parseble.abstract';
+import { ParserCSV } from './parseble.abstract';
 
 export class AmiraSheetElement {
   @IsNumber()
@@ -58,7 +58,7 @@ export class AmiraSheetElement {
     [() => true, ({ field }) => field],
   ]);
 
-  static parser = new ParsebleCSV(
+  static parser = new ParserCSV(
     AmiraSheetElement,
     (header, index) =>
       AmiraSheetElement.headerTransformer({ index, field: header }),

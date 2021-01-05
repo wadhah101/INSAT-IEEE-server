@@ -4,7 +4,7 @@ import { ClassType } from 'class-transformer/ClassTransformer';
 import { validateSync } from 'class-validator';
 import Papa from 'papaparse';
 
-export class ParsebleCSV<T> {
+export class ParserCSV<T> {
   constructor(
     private readonly cls: ClassType<T>,
 

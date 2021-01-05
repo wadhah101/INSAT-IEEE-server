@@ -1,4 +1,4 @@
-import { ParsebleCSV } from './parseble.abstract';
+import { ParserCSV } from './parseble.abstract';
 import { Gender } from '@prisma/client';
 import { IsInt, IsEmail, IsEnum, IsOptional } from 'class-validator';
 import _ from 'lodash';
@@ -38,7 +38,7 @@ export class IEEEAnlyticsElement {
     [() => true, () => ''],
   ]);
 
-  static parser = new ParsebleCSV(
+  static parser = new ParserCSV(
     IEEEAnlyticsElement,
     (_header, index) => IEEEAnlyticsElement.headerParser(index),
     (v, f) => IEEEAnlyticsElement.transformer({ v, f }),

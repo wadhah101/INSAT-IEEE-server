@@ -62,9 +62,8 @@ export class MemberController {
   }
 
   @SetMetadata('NODE_ENV', 'development')
-  @Post('seed/cards')
   @UseInterceptors(FileInterceptor('file'))
-  async loadCardCSV(@UploadedFile() file: Express.Multer.File) {
+  async loadCardV1CSV(@UploadedFile() file: Express.Multer.File) {
     if (!file)
       throw new HttpException(
         'Please upload a file',
@@ -85,15 +84,15 @@ export class MemberController {
   }
 
   @SetMetadata('NODE_ENV', 'development')
-  @Post('demo')
+  @Post('seed/cards')
   @UseInterceptors(
     FileFieldsInterceptor([
-      { name: 'form', maxCount: 1 },
-      { name: 'analytics', maxCount: 1 },
-      { name: 'amiraSheet', maxCount: 1 },
+      { name: 'formFile', maxCount: 1 },
+      { name: 'analyticsFile', maxCount: 1 },
+      { name: 'amiraSheetFile', maxCount: 1 },
     ]),
   )
-  async meh(
+  async loadCardV2CSV(
     @UploadedFiles()
     {
       formFile,
@@ -115,51 +114,12 @@ export class MemberController {
 
     const formReq = CardFormV2Raw.parser.fromCSV(formFile[0].buffer.toString());
 
-    const allReq = this.prisma.member.findMany();
-
-    const [amira, ieeeAnalytics, form, all] = await Promise.all([
+    const [amira, ieeeAnalytics, form] = await Promise.all([
       amiraReq,
       ieeeAnalyticsReq,
       formReq,
-      allReq,
     ]);
 
-    const matchyMatchy = form.map((e) => ({
-      old: all.find(
-        ({ phone, email }) =>
-          phone === e.phoneNumber ||
-          email.toLowerCase() === e.personalEmail.toLowerCase(),
-      ),
-      form: e,
-      analytics: ieeeAnalytics.find(({ ieeeID }) => ieeeID === e.ieeeID),
-      amira: amira.find(({ ieeeID }) => ieeeID === e.ieeeID),
-    }));
-
-    const [inOldForm, notInOldForm] = _.partition(matchyMatchy, (e) => e.old);
-
-    const newInserts = notInOldForm.map((e) => {
-      const ieeeMail = '';
-      const c: Prisma.MemberCreateArgs = {
-        data: {
-          fullName: e.form.fullName,
-          email: e.form.personalEmail,
-          phone: e.form.phoneNumber,
-          fbLink: e.amira?.fbLink,
-          studyField: e.amira?.studyField,
-          studyLevel: e.amira?.studyLevel,
-          gender: e.amira?.gender || e.analytics?.gender,
-          ieeeAccount: {
-            create: {
-              id: e.form.ieeeID,
-              expirationDate: new Date(e.analytics.year + 1, 3, 1),
-              email: ieeeMail,
-            },
-          },
-        },
-      };
-      return c;
-    });
-
-    return { amira };
+    return this.memberService.seedFromCardFormV2(amira, ieeeAnalytics, form);
   }
 }

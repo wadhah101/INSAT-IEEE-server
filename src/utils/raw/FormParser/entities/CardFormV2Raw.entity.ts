@@ -1,4 +1,4 @@
-import { ParsebleCSV } from './../../../entities/parseble.abstract';
+import { ParserCSV } from './../../../entities/parseble.abstract';
 import { plainToClass } from 'class-transformer';
 import {
   IsDate,
@@ -65,7 +65,7 @@ export class CardFormV2Raw {
     [() => true, ({ v }) => v],
   ]);
 
-  static parser = new ParsebleCSV(
+  static parser = new ParserCSV(
     CardFormV2Raw,
     (_header, index) => CardFormV2Raw.headerTransformer(index),
     (v, f) => CardFormV2Raw.transformer({ v, f }),

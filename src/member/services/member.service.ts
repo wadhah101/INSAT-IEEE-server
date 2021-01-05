@@ -1,8 +1,12 @@
+import { CardFormV2Raw } from './../../utils/raw/FormParser/entities/CardFormV2Raw.entity';
+import { IEEEAnlyticsElement } from './../../utils/entities/IEEEAnlytics.entity';
+import { AmiraSheetElement } from './../../utils/entities/AmiraSheet.entity';
 import { CardFormV1Raw } from '../../utils/raw/FormParser/entities/CardFormV1Raw.entity';
 import { Injectable } from '@nestjs/common';
-import { Member } from '@prisma/client';
+import { Member, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InscriptionFormRaw } from 'src/utils/raw/FormParser/entities/InscriptionFormRaw.entity';
+import _ from 'lodash';
 
 @Injectable()
 export class MemberService {
@@ -71,5 +75,86 @@ export class MemberService {
       this.prisma.member.create(e.toNewMember()),
     );
     return this.prisma.$transaction([...inPrevWork, ...nonInPrevWork]);
+  }
+
+  // TODO wave as param
+  async seedFromCardFormV2(
+    amira: AmiraSheetElement[],
+    ieeeAnalytics: IEEEAnlyticsElement[],
+    form: CardFormV2Raw[],
+  ) {
+    const all = await this.prisma.member.findMany();
+
+    const matchyMatchy = form.map((e) => ({
+      old: all.find(
+        ({ phone, email }) =>
+          phone === e.phoneNumber ||
+          email.toLowerCase() === e.personalEmail.toLowerCase(),
+      ),
+      form: e,
+      analytics: ieeeAnalytics.find(({ ieeeID }) => ieeeID === e.ieeeID),
+      amira: amira.find(({ ieeeID }) => ieeeID === e.ieeeID),
+    }));
+
+    const [inOldForm, notInOldForm] = _.partition(matchyMatchy, (e) => e.old);
+
+    const inserts = notInOldForm.map((e) => {
+      const ieeeMail = '';
+      const c: Prisma.MemberCreateArgs = {
+        data: {
+          fullName: e.form.fullName,
+          email: e.form.personalEmail,
+          phone: e.form.phoneNumber,
+          fbLink: e.amira?.fbLink,
+          studyField: e.amira?.studyField,
+          studyLevel: e.amira?.studyLevel,
+          gender: e.amira?.gender || e.analytics?.gender,
+          ieeeAccount: {
+            create: {
+              id: e.form.ieeeID,
+              expirationDate: new Date(e.analytics.year + 1, 3, 1),
+              email: ieeeMail,
+            },
+          },
+          MemberBadge: {
+            create: {
+              wave: 2,
+              exported: false,
+              imageDriveId: e.form.pictureID,
+            },
+          },
+        },
+      };
+      return c;
+    });
+
+    const updates = inOldForm
+      .filter((e) => e.analytics)
+      .map((e) => {
+        const c: Prisma.MemberUpdateArgs = {
+          where: {
+            id: e.old.id,
+          },
+          data: {
+            ieeeAccount: {
+              create: {
+                id: e.form.ieeeID,
+                expirationDate: new Date(e.analytics.year + 1, 3, 1),
+              },
+            },
+
+            MemberBadge: {
+              create: {
+                wave: 2,
+                exported: false,
+                imageDriveId: e.form.pictureID,
+              },
+            },
+          },
+        };
+        return c;
+      });
+
+    return { inserts, updates };
   }
 }
