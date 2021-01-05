@@ -1,4 +1,3 @@
-import { PrismaService } from './../../prisma/prisma.service';
 import {
   Controller,
   Get,
@@ -18,9 +17,6 @@ import { FormParserService } from 'src/utils/raw/FormParser/FormParser.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { IEEEAnlyticsElement } from 'src/utils/entities/IEEEAnlytics.entity';
 import { CardFormV2Raw } from 'src/utils/raw/FormParser/entities/CardFormV2Raw.entity';
-import _ from 'lodash';
-import { Prisma } from '@prisma/client';
-import { phone } from 'faker';
 import { AmiraSheetElement } from 'src/utils/entities/AmiraSheet.entity';
 
 @Controller('member')
@@ -29,7 +25,6 @@ export class MemberController {
   constructor(
     private readonly memberService: MemberService,
     private readonly rawCardInfoService: FormParserService,
-    private readonly prisma: PrismaService,
   ) {}
 
   @SetMetadata('NODE_ENV', 'development')

@@ -9,12 +9,7 @@ export class MemberExportsService {
 
   async exportToPhotoshopCSV(): Promise<string> {
     const raw = await this.prisma.member.findMany({
-      select: {
-        id: true,
-        fullName: true,
-        ieeeAccount: true,
-        MemberBadge: true,
-      },
+      include: { ieeeAccount: true },
       where: { MemberBadge: { isNot: null } },
     });
 
