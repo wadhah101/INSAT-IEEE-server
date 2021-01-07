@@ -98,63 +98,63 @@ export class MemberService {
 
     const [inOldForm, notInOldForm] = _.partition(matchyMatchy, (e) => e.old);
 
-    const inserts = notInOldForm.map((e) => {
-      const ieeeMail = '';
-      const c: Prisma.MemberCreateArgs = {
-        data: {
-          fullName: e.form.fullName,
-          email: e.form.personalEmail,
-          phone: e.form.phoneNumber,
-          fbLink: e.amira?.fbLink,
-          studyField: e.amira?.studyField,
-          studyLevel: e.amira?.studyLevel,
-          gender: e.amira?.gender || e.analytics?.gender,
-          ieeeAccount: {
-            create: {
-              id: e.form.ieeeID,
-              expirationDate: new Date(e.analytics.year + 1, 3, 1),
-              email: ieeeMail,
-            },
-          },
-          MemberBadge: {
-            create: {
-              wave: 2,
-              exported: false,
-              imageDriveId: e.form.pictureID,
-            },
-          },
-        },
-      };
-      return c;
-    });
+    // const inserts = notInOldForm.map((e) => {
+    //   const ieeeMail = '';
+    //   const c: Prisma.MemberCreateArgs = {
+    //     data: {
+    //       fullName: e.form.fullName,
+    //       email: e.form.personalEmail,
+    //       phone: e.form.phoneNumber,
+    //       fbLink: e.amira?.fbLink,
+    //       studyField: e.amira?.studyField,
+    //       studyLevel: e.amira?.studyLevel,
+    //       gender: e.amira?.gender || e.analytics?.gender,
+    //       ieeeAccount: {
+    //         create: {
+    //           id: e.form.ieeeID,
+    //           expirationDate: new Date(e.analytics.year + 1, 3, 1),
+    //           email: ieeeMail,
+    //         },
+    //       },
+    //       MemberBadge: {
+    //         create: {
+    //           wave: 2,
+    //           exported: false,
+    //           imageDriveId: e.form.pictureID,
+    //         },
+    //       },
+    //     },
+    //   };
+    //   return c;
+    // });
 
-    const updates = inOldForm
-      .filter((e) => e.analytics)
-      .map((e) => {
-        const c: Prisma.MemberUpdateArgs = {
-          where: {
-            id: e.old.id,
-          },
-          data: {
-            ieeeAccount: {
-              create: {
-                id: e.form.ieeeID,
-                expirationDate: new Date(e.analytics.year + 1, 3, 1),
-              },
-            },
+    // const updates = inOldForm
+    //   .filter((e) => e.analytics)
+    //   .map((e) => {
+    //     const c: Prisma.MemberUpdateArgs = {
+    //       where: {
+    //         id: e.old.id,
+    //       },
+    //       data: {
+    //         ieeeAccount: {
+    //           create: {
+    //             id: e.form.ieeeID,
+    //             expirationDate: new Date(e.analytics.year + 1, 3, 1),
+    //           },
+    //         },
 
-            MemberBadge: {
-              create: {
-                wave: 2,
-                exported: false,
-                imageDriveId: e.form.pictureID,
-              },
-            },
-          },
-        };
-        return c;
-      });
+    //         MemberBadge: {
+    //           create: {
+    //             wave: 2,
+    //             exported: false,
+    //             imageDriveId: e.form.pictureID,
+    //           },
+    //         },
+    //       },
+    //     };
+    //     return c;
+    //   });
 
-    return { inserts, updates };
+    return {};
   }
 }
