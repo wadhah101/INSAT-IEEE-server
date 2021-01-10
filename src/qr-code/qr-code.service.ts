@@ -2,7 +2,6 @@ import { IEEEAccount, Member } from '@prisma/client';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateQrCodeDto } from './dto/create-qr-code.dto';
-import { UpdateQrCodeDto } from './dto/update-qr-code.dto';
 import { QrCode } from './entities/qr-code.entity';
 
 @Injectable()
@@ -42,22 +41,6 @@ export class QrCodeService {
     };
 
     return res;
-  }
-
-  findAll() {
-    return `This action returns all qrCode`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} qrCode`;
-  }
-
-  update(id: number, updateQrCodeDto: UpdateQrCodeDto) {
-    return `This action updates a #${id} qrCode`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} qrCode`;
   }
 }
 

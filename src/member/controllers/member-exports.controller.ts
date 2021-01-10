@@ -40,7 +40,7 @@ export class MemberExportsController {
 
     // Add Member pictures
     pictures.forEach((e) => {
-      zip.addFile(`picture/${e.name}`, e.file);
+      zip.addFile(`picture/${e.name}`, e.fileBuffer);
     });
 
     // Add data

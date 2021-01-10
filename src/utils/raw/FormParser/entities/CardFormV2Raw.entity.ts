@@ -1,21 +1,18 @@
 import { ParserCSV } from './../../../entities/parseble.abstract';
-import { plainToClass } from 'class-transformer';
 import {
   IsDate,
   IsEmail,
   IsNotEmpty,
   IsNumber,
   IsString,
-  validateSync,
 } from 'class-validator';
 import _ from 'lodash';
-import Papa from 'papaparse';
 
 export class CardFormV2Raw {
   @IsDate()
   timeStamp: Date;
 
-  @IsString()
+  @IsString() aasba;
   @IsNotEmpty()
   fullName: string;
 
@@ -68,6 +65,6 @@ export class CardFormV2Raw {
   static parser = new ParserCSV(
     CardFormV2Raw,
     (_header, index) => CardFormV2Raw.headerTransformer(index),
-    (v, f) => CardFormV2Raw.transformer({ v, f }),
+    (value, field) => CardFormV2Raw.transformer({ v: value, f: field }),
   );
 }

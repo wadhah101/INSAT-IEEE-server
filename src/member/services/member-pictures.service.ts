@@ -10,7 +10,7 @@ import _ from 'lodash';
 @Injectable()
 export class MemberPicturesService {
   constructor(
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
     private readonly googleDriveService: GoogleDriveService,
   ) {}
 
@@ -34,7 +34,7 @@ export class MemberPicturesService {
     console.log('downloading', nonDownloadedImages);
 
     return nonDownloadedImages.length
-      ? this.googleDriveService.downloadFilesFromIds(nonDownloadedImages)
+      ? this.googleDriveService.downloadFiles(nonDownloadedImages)
       : [];
   }
 
@@ -49,11 +49,11 @@ export class MemberPicturesService {
         env.PICTURE_STORAGE_LOCATION_RAW,
         e.MemberBadge.imageDriveId,
       );
-      const file = await fs.readFile(oldPath);
-      const c = await fileType.fromBuffer(file);
+      const fileBuffer = await fs.readFile(oldPath);
+      const c = await fileType.fromBuffer(fileBuffer);
 
       const newName = `${e.fullName} ${e.id}.${c.ext}`;
-      return { name: newName, file };
+      return { name: newName, fileBuffer, memberId: e.id };
     });
 
     return Promise.all(withImagesReq);

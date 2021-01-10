@@ -3,7 +3,7 @@ import { IEEEAnlyticsElement } from './../../utils/entities/IEEEAnlytics.entity'
 import { AmiraSheetElement } from './../../utils/entities/AmiraSheet.entity';
 import { CardFormV1Raw } from '../../utils/raw/FormParser/entities/CardFormV1Raw.entity';
 import { Injectable } from '@nestjs/common';
-import { Member, Prisma } from '@prisma/client';
+import { Member } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InscriptionFormRaw } from 'src/utils/raw/FormParser/entities/InscriptionFormRaw.entity';
 import _ from 'lodash';
@@ -96,7 +96,7 @@ export class MemberService {
       amira: amira.find(({ ieeeID }) => ieeeID === e.ieeeID),
     }));
 
-    const [inOldForm, notInOldForm] = _.partition(matchyMatchy, (e) => e.old);
+    const [] = _.partition(matchyMatchy, (e) => e.old);
 
     // const inserts = notInOldForm.map((e) => {
     //   const ieeeMail = '';

@@ -8,8 +8,6 @@ import * as Papa from 'papaparse';
 
 @Injectable()
 export class FormParserService {
-
-  
   async CardFormV1RawParser(data: string) {
     const CardInfoReq = Papa.parse<ICardFormV1Raw>(data, {
       header: true,

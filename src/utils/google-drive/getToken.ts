@@ -86,13 +86,11 @@ export async function downloadFile(auth, fileId: string) {
   return { fileId, data: downloadReq.data };
 }
 
-export async function fullAuth() {
+export async function getAuthObject() {
   const credentielsRaw = await fs.promises
     .readFile('credentials.json')
     .catch((e) => console.log('Error loading client secret file:', e));
   if (!credentielsRaw) return;
-
-  console.log('djdjdjdjdj');
   const credentiels = JSON.parse(credentielsRaw.toString());
   await asyncAuthorize(credentiels);
   const authToken = await asyncAuthorize(credentiels);

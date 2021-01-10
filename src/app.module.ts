@@ -6,7 +6,6 @@ import { RunnerService } from './runner/runner.service';
 import { PartnerModule } from './partner/partner.module';
 import { QrCodeModule } from './qr-code/qr-code.module';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
-import { GoogleDriveService } from './utils/google-drive/google-drive.service';
 import { GoogleDriveModule } from './utils/google-drive/google-drive.module';
 import { FormParserModule } from './utils/raw/FormParser/FormParser.module';
 

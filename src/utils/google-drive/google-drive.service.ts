@@ -1,29 +1,57 @@
-import { Injectable } from '@nestjs/common';
-import { downloadFile, fullAuth } from './getToken';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
+import { getAuthObject } from './getToken';
 import * as fs from 'fs';
 import { join } from 'path';
 import { env } from 'process';
+import { google } from 'googleapis';
+import { Readable } from 'stream';
 
 @Injectable()
-export class GoogleDriveService {
-  async downloadFilesFromIds(ids: string[]): Promise<string[]> {
-    const auth = await fullAuth();
-    console.log('meta download Started');
-    const idsReq = ids.map((e) => downloadFile(auth, e));
-    const res = await Promise.all(idsReq);
-    let counter = 0;
-    const work = res.map((e) => {
-      const file = fs.createWriteStream(
-        join(env.PICTURE_STORAGE_LOCATION_RAW, e.fileId),
-      );
-      return new Promise<string>((resolve, reject) => {
-        e.data.on('end', () => {
-          console.log('download', e.fileId, `${++counter}/${ids.length}`);
-          return resolve(e.fileId);
-        });
-        e.data.on('error', (error) => reject(error)).pipe(file);
+export class GoogleDriveService implements OnModuleInit {
+  private auth;
+
+  async onModuleInit() {
+    this.auth = await getAuthObject();
+  }
+
+  async getFileStream(fileId: string): Promise<Readable> {
+    const drive = google.drive({ version: 'v3', auth: this.auth });
+    const downloadReq = await drive.files
+      .get(
+        {
+          fileId,
+          alt: 'media',
+        },
+        { responseType: 'stream' },
+      )
+      .catch((e) => {
+        throw new HttpException(e, HttpStatus.UNPROCESSABLE_ENTITY);
       });
+
+    return downloadReq.data;
+  }
+
+  async downloadFile(fileId: string): Promise<string> {
+    const downloadStream = await this.getFileStream(fileId);
+    const localFile = fs.createWriteStream(
+      join(env.PICTURE_STORAGE_LOCATION_RAW, fileId),
+    );
+    return new Promise<string>((resolve) => {
+      downloadStream
+        .on('end', () => {
+          return resolve(fileId);
+        })
+        .pipe(localFile);
     });
+  }
+
+  async downloadFiles(filesIds: string[]): Promise<string[]> {
+    const work = filesIds.map((e) => this.downloadFile(e));
     return Promise.all(work);
   }
 }
