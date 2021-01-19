@@ -12,7 +12,7 @@ export class CardFormV2Raw {
   @IsDate()
   timeStamp: Date;
 
-  @IsString() aasba;
+  @IsString()
   @IsNotEmpty()
   fullName: string;
 
@@ -31,22 +31,16 @@ export class CardFormV2Raw {
 
   private static headerTransformer = _.cond<number, string>([
     ...([
-      [0, 'timeStamp'],
-      [1, 'fullName'],
+      [0, 'fullName'],
       [2, 'personalEmail'],
       [3, 'phoneNumber'],
       [4, 'ieeeID'],
-      [5, 'pictureID'],
+      [6, 'pictureID'],
+      [7, 'phoneNumber'],
     ].map((e) => [(ind) => ind === e[0], () => e[1]]) as any),
 
     // else
-    [
-      () => true,
-      (e) => {
-        console.log('unexpected header ', e);
-        return `${e}`;
-      },
-    ],
+    [() => true, (e) => e],
   ]);
 
   /**

@@ -10,14 +10,13 @@ export class MemberExportsService {
   async exportToPhotoshopCSV(): Promise<string> {
     const raw = await this.prisma.member.findMany({
       include: { ieeeAccount: true },
-      where: { MemberBadge: { isNot: null } },
+      where: { MemberBadge: { wave: 2 } },
     });
 
     const data = raw.map((e) => ({
       ieeeId: e.ieeeAccount ? e.ieeeAccount.id : null,
       fullName: e.fullName,
-      // TODO fix file extension
-      imageFile: `${e.fullName} ${e.id}.jpg`,
+      imageFile: `${e.fullName} ${e.id}.jpeg`,
       qrCode: `${e.id}.png`,
     }));
 
@@ -28,7 +27,7 @@ export class MemberExportsService {
   async genqQrs() {
     const c = await this.prisma.member.findMany({
       select: { id: true },
-      where: { MemberBadge: { isNot: null } },
+      where: { MemberBadge: { wave: 2 } },
     });
 
     const codesReq = c.map(async (e) => ({

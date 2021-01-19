@@ -34,6 +34,10 @@ export class AmiraSheetElement {
   @IsEnum(Gender)
   gender: Gender;
 
+  @IsOptional()
+  @IsNumber()
+  phoneNumber: number;
+
   private static transformer = _.cond<
     { f: string | number; v: string },
     string
@@ -41,6 +45,10 @@ export class AmiraSheetElement {
     [
       ({ f }) => f === 'gender',
       ({ v }) => (v && v === 'Female' ? Gender.female : Gender.male),
+    ],
+    [
+      ({ f }) => f === 'phoneNumber',
+      ({ v }) => `${Number(v) % Math.pow(10, 8)}`,
     ],
     [() => true, ({ v }) => (v === '' ? null : v)],
   ]);
@@ -52,6 +60,7 @@ export class AmiraSheetElement {
     [({ index }) => index === 16, () => 'ieeeID'],
     [({ index }) => index === 18, () => 'gender'],
     [({ index }) => index === 3, () => 'personalEmail'],
+    [({ index }) => index === 4, () => 'phoneNumber'],
     [({ index }) => index === 5, () => 'fbLink'],
     [({ index }) => index === 6, () => 'studyField'],
     [({ index }) => index === 7, () => 'studyLevel'],

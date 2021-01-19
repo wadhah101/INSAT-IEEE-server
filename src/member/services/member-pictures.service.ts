@@ -4,8 +4,11 @@ import { GoogleDriveService } from 'src/utils/google-drive/google-drive.service'
 import * as fileType from 'file-type';
 import { join } from 'path';
 import { env } from 'process';
-import { promises as fs } from 'fs';
+
+import { promises as fsp } from 'fs';
+import fs from 'fs';
 import _ from 'lodash';
+import sharp from 'sharp';
 
 @Injectable()
 export class MemberPicturesService {
@@ -18,12 +21,14 @@ export class MemberPicturesService {
   async downloadImage(): Promise<string[]> {
     const all = await this.prisma.member.findMany({
       select: { MemberBadge: true },
-      where: { MemberBadge: { isNot: null } },
+      where: { MemberBadge: { wave: 2 } },
     });
 
-    // TODO add directory existance check
     // search download directory for already downloaded image files
-    const downloadedImages = await fs.readdir(env.PICTURE_STORAGE_LOCATION_RAW);
+    const dir = env.PICTURE_STORAGE_LOCATION_RAW;
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const downloadedImages = await fsp.readdir(dir);
 
     // only download needed picture
     const nonDownloadedImages = _.difference(
@@ -41,7 +46,7 @@ export class MemberPicturesService {
   async linkImages() {
     const data = await this.prisma.member.findMany({
       include: { MemberBadge: true },
-      where: { MemberBadge: { isNot: null } },
+      where: { MemberBadge: { wave: 2 } },
     });
 
     const withImagesReq = data.map(async (e) => {
@@ -49,10 +54,14 @@ export class MemberPicturesService {
         env.PICTURE_STORAGE_LOCATION_RAW,
         e.MemberBadge.imageDriveId,
       );
-      const fileBuffer = await fs.readFile(oldPath);
-      const c = await fileType.fromBuffer(fileBuffer);
+      const initFile = await fsp.readFile(oldPath);
+      const fileBuffer = await sharp(initFile)
+        .resize({ width: 1280, withoutEnlargement: true })
+        .jpeg()
+        .toBuffer();
 
-      const newName = `${e.fullName} ${e.id}.${c.ext}`;
+      // TODO transform with sharp
+      const newName = `${e.fullName} ${e.id}.jpeg`;
       return { name: newName, fileBuffer, memberId: e.id };
     });
 

@@ -48,7 +48,6 @@ export class CardFormV1Raw implements ICardFormV1Raw {
       data: {
         MemberBadge: {
           create: {
-            // TODO
             wave: 1,
             imageDriveId: this.picture.match(
               CardFormV1Raw.imageDrivePattern,
@@ -73,7 +72,6 @@ export class CardFormV1Raw implements ICardFormV1Raw {
         phone: Number(this.phone),
         MemberBadge: {
           create: {
-            // TODO
             wave: 1,
             imageDriveId: this.picture.match(
               CardFormV1Raw.imageDrivePattern,

@@ -3,10 +3,11 @@ import { IEEEAnlyticsElement } from './../../utils/entities/IEEEAnlytics.entity'
 import { AmiraSheetElement } from './../../utils/entities/AmiraSheet.entity';
 import { CardFormV1Raw } from '../../utils/raw/FormParser/entities/CardFormV1Raw.entity';
 import { Injectable } from '@nestjs/common';
-import { Member } from '@prisma/client';
+import { Member, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InscriptionFormRaw } from 'src/utils/raw/FormParser/entities/InscriptionFormRaw.entity';
 import _ from 'lodash';
+import fp from 'lodash/fp';
 
 @Injectable()
 export class MemberService {
@@ -93,68 +94,86 @@ export class MemberService {
       ),
       form: e,
       analytics: ieeeAnalytics.find(({ ieeeID }) => ieeeID === e.ieeeID),
-      amira: amira.find(({ ieeeID }) => ieeeID === e.ieeeID),
+      amira: amira.find(
+        ({ ieeeID, phoneNumber }) =>
+          ieeeID === e.ieeeID || phoneNumber === e.phoneNumber,
+      ),
     }));
 
-    const [] = _.partition(matchyMatchy, (e) => e.old);
+    const [inOldForm, notInOldForm] = _.partition(matchyMatchy, (e) => e.old);
 
-    // const inserts = notInOldForm.map((e) => {
-    //   const ieeeMail = '';
-    //   const c: Prisma.MemberCreateArgs = {
-    //     data: {
-    //       fullName: e.form.fullName,
-    //       email: e.form.personalEmail,
-    //       phone: e.form.phoneNumber,
-    //       fbLink: e.amira?.fbLink,
-    //       studyField: e.amira?.studyField,
-    //       studyLevel: e.amira?.studyLevel,
-    //       gender: e.amira?.gender || e.analytics?.gender,
-    //       ieeeAccount: {
-    //         create: {
-    //           id: e.form.ieeeID,
-    //           expirationDate: new Date(e.analytics.year + 1, 3, 1),
-    //           email: ieeeMail,
-    //         },
-    //       },
-    //       MemberBadge: {
-    //         create: {
-    //           wave: 2,
-    //           exported: false,
-    //           imageDriveId: e.form.pictureID,
-    //         },
-    //       },
-    //     },
-    //   };
-    //   return c;
-    // });
+    const inserts = notInOldForm.map((e) => {
+      const t = [e.form.personalEmail, null];
+      const tr = t.reverse();
+      const [ieeeMailFromForm, personalEmail] = e.form.personalEmail.endsWith(
+        '@ieee.org',
+      )
+        ? t
+        : tr;
+      const ieeeMailFromAnalytics =
+        e.analytics && e.analytics.email.endsWith('@ieee.org')
+          ? e.analytics.email
+          : null;
 
-    // const updates = inOldForm
-    //   .filter((e) => e.analytics)
-    //   .map((e) => {
-    //     const c: Prisma.MemberUpdateArgs = {
-    //       where: {
-    //         id: e.old.id,
-    //       },
-    //       data: {
-    //         ieeeAccount: {
-    //           create: {
-    //             id: e.form.ieeeID,
-    //             expirationDate: new Date(e.analytics.year + 1, 3, 1),
-    //           },
-    //         },
+      fp.get('')(e);
 
-    //         MemberBadge: {
-    //           create: {
-    //             wave: 2,
-    //             exported: false,
-    //             imageDriveId: e.form.pictureID,
-    //           },
-    //         },
-    //       },
-    //     };
-    //     return c;
-    //   });
+      const c: Prisma.MemberCreateArgs = {
+        data: {
+          fullName: e.form.fullName,
+          email: personalEmail,
+          phone: e.form.phoneNumber,
+          fbLink: fp.get('amira.fbLink')(e),
+          studyField: fp.get('amira.studyField')(e),
+          studyLevel: fp.get('amira.studyLevel')(e),
+          gender: fp.get('amira.gender')(e) || fp.get('analytics.gender')(e),
+          ieeeAccount: {
+            create: {
+              id: e.form.ieeeID,
+              expirationDate: !e.analytics
+                ? new Date(2022, 3, 1)
+                : new Date(e.analytics.year + 1, 2, 1),
+              email: ieeeMailFromAnalytics || ieeeMailFromForm,
+            },
+          },
+          MemberBadge: {
+            create: {
+              wave: 2,
+              exported: false,
+              imageDriveId: e.form.pictureID,
+            },
+          },
+        },
+      };
 
-    return {};
+      return this.prisma.member.create(c);
+    });
+
+    const updates = inOldForm.map((e) => {
+      const c: Prisma.MemberUpdateArgs = {
+        where: {
+          id: e.old.id,
+        },
+        data: {
+          ieeeAccount: {
+            create: {
+              id: e.form.ieeeID,
+              expirationDate: !e.analytics
+                ? new Date(2022, 3, 1)
+                : new Date(e.analytics.year + 1, 2, 1),
+            },
+          },
+          MemberBadge: {
+            create: {
+              wave: 2,
+              exported: false,
+              imageDriveId: e.form.pictureID,
+            },
+          },
+        },
+      };
+      return this.prisma.member.update(c);
+    });
+
+    return this.prisma.$transaction([...inserts, ...updates]);
   }
 }
