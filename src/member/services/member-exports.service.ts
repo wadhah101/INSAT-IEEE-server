@@ -10,7 +10,7 @@ export class MemberExportsService {
   async exportToPhotoshopCSV(): Promise<string> {
     const raw = await this.prisma.member.findMany({
       include: { ieeeAccount: true },
-      where: { MemberBadge: { wave: 2 } },
+      where: { MemberBadge: { wave: 2, paid: true } },
     });
 
     const data = raw.map((e) => ({
@@ -27,7 +27,7 @@ export class MemberExportsService {
   async genqQrs() {
     const c = await this.prisma.member.findMany({
       select: { id: true },
-      where: { MemberBadge: { wave: 2 } },
+      where: { MemberBadge: { wave: 2, paid: true } },
     });
 
     const codesReq = c.map(async (e) => ({

@@ -117,4 +117,18 @@ export class MemberController {
 
     return this.memberService.seedFromCardFormV2(amira, ieeeAnalytics, form);
   }
+
+  @SetMetadata('NODE_ENV', 'development')
+  @Post('seed/paiment')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'formFile', maxCount: 1 }]))
+  async addPaidStatus(
+    @UploadedFiles()
+    { formFile }: { formFile: Express.Multer.File[] },
+  ) {
+    const formReq = await CardFormV2Raw.parser.fromCSV(
+      formFile[0].buffer.toString(),
+    );
+
+    return this.memberService.fillPaid(formReq);
+  }
 }

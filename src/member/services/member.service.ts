@@ -86,6 +86,8 @@ export class MemberService {
   ) {
     const all = await this.prisma.member.findMany();
 
+    console.log(form);
+
     const matchyMatchy = form.map((e) => ({
       old: all.find(
         ({ phone, email }) =>
@@ -138,7 +140,6 @@ export class MemberService {
           MemberBadge: {
             create: {
               wave: 2,
-              exported: false,
               imageDriveId: e.form.pictureID,
             },
           },
@@ -165,7 +166,6 @@ export class MemberService {
           MemberBadge: {
             create: {
               wave: 2,
-              exported: false,
               imageDriveId: e.form.pictureID,
             },
           },
@@ -175,5 +175,31 @@ export class MemberService {
     });
 
     return this.prisma.$transaction([...inserts, ...updates]);
+  }
+
+  async fillPaid(form: CardFormV2Raw[]) {
+    const all = await this.prisma.member.findMany({
+      include: { ieeeAccount: true },
+      where: { ieeeAccount: { isNot: null } },
+    });
+    const allPaid = all.filter((e) =>
+      form.find((e1) => e1.ieeeID === e.ieeeAccount.id && e1.paid),
+    );
+
+    const updates: Prisma.MemberUpdateArgs[] = allPaid.map((e) => ({
+      where: { id: e.id },
+      data: {
+        MemberBadge: {
+          update: {
+            paid: !!form.find(
+              (e1) => e1.ieeeID === e.ieeeAccount.id && e1.paid,
+            ),
+          },
+        },
+      },
+    }));
+    return this.prisma.$transaction(
+      updates.map((e) => this.prisma.member.update(e)),
+    );
   }
 }

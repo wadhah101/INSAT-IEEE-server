@@ -1,5 +1,6 @@
 import { ParserCSV } from './../../../entities/parseble.abstract';
 import {
+  IsBoolean,
   IsDate,
   IsEmail,
   IsNotEmpty,
@@ -29,6 +30,10 @@ export class CardFormV2Raw {
   @IsString()
   pictureID: string;
 
+  @IsNotEmpty()
+  @IsBoolean()
+  paid;
+
   private static headerTransformer = _.cond<number, string>([
     ...([
       [0, 'fullName'],
@@ -37,6 +42,7 @@ export class CardFormV2Raw {
       [4, 'ieeeID'],
       [6, 'pictureID'],
       [7, 'phoneNumber'],
+      [8, 'paid'],
     ].map((e) => [(ind) => ind === e[0], () => e[1]]) as any),
 
     // else
@@ -49,10 +55,11 @@ export class CardFormV2Raw {
    */
   private static transformer = _.cond<
     { v: string; f: string | number },
-    string
+    string | boolean
   >([
     [({ f }) => f === 'pictureID', ({ v }) => v.match(/id=(.*)/)[1]],
     [({ f }) => f === 'fullName', ({ v }) => _.startCase(v)],
+    [({ f }) => f === 'paid', ({ v }) => v === 'TRUE'],
     [() => true, ({ v }) => v],
   ]);
 

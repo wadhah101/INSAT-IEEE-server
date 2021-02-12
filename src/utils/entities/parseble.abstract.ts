@@ -15,7 +15,7 @@ export class ParserCSV<T> {
     private readonly transformer?: (
       value: string,
       field: string | number,
-    ) => string,
+    ) => any,
   ) {}
 
   async parseMany(e: Record<string, any>[]): Promise<T[]> {

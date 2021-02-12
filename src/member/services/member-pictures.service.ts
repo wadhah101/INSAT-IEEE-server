@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GoogleDriveService } from 'src/utils/google-drive/google-drive.service';
-import * as fileType from 'file-type';
 import { join } from 'path';
 import { env } from 'process';
 
@@ -21,7 +20,7 @@ export class MemberPicturesService {
   async downloadImage(): Promise<string[]> {
     const all = await this.prisma.member.findMany({
       select: { MemberBadge: true },
-      where: { MemberBadge: { wave: 2 } },
+      where: { MemberBadge: { wave: 2, paid: true } },
     });
 
     // search download directory for already downloaded image files
@@ -46,7 +45,7 @@ export class MemberPicturesService {
   async linkImages() {
     const data = await this.prisma.member.findMany({
       include: { MemberBadge: true },
-      where: { MemberBadge: { wave: 2 } },
+      where: { MemberBadge: { wave: 2, paid: true } },
     });
 
     const withImagesReq = data.map(async (e) => {
