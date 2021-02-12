@@ -59,7 +59,6 @@ export class MemberPicturesService {
         .jpeg()
         .toBuffer();
 
-      // TODO transform with sharp
       const newName = `${e.fullName} ${e.id}.jpeg`;
       return { name: newName, fileBuffer, memberId: e.id };
     });

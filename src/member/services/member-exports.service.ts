@@ -14,7 +14,11 @@ export class MemberExportsService {
     });
 
     const data = raw.map((e) => ({
-      ieeeId: e.ieeeAccount ? e.ieeeAccount.id : null,
+      ieeeId: e.ieeeAccount
+        ? e.ieeeAccount.id > 1000
+          ? e.ieeeAccount.id
+          : 'xxxxxx'
+        : null,
       fullName: e.fullName,
       imageFile: `${e.fullName} ${e.id}.jpeg`,
       qrCode: `${e.id}.png`,
